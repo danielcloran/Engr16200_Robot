@@ -121,17 +121,31 @@ class PhysicalMapper:
         mag = mpu.readMagnet()
         return mag['z']
     
-    # Unit vector in direction of magnetic field
-    def getMagUnitVector(self):
-        mm = self.getMag()
-        mx = self.getMagX()
-        my = self.getMagY()
-        mz = self.getMagZ()
-        return mx / mm, my / mm, mz / mm
-        
-        
-        
+    # Scalar distance to nearby magnet
+    def magDist(self):
+        #B = mu0M/(4piR^3) = K/R^3 --> R = (K/B)^(1/3)
+        k = 1 #can maybe experimentally find K?
+        r = (k / self.getMag) ** (1/3)
+        return r
+    
+    # Guess magnet position as some distance in front of robot
+    def markMagnet(self, x, y, theta):
+        deltaX = self.magDist() * math.cos(math.radians(theta))
+        deltaY = self.magDist() * math.sin(math.radians(theta))
+        return x + deltaX, y + deltaY
 
+    # Check if magnet is nearby to guess location
+    def checkMagNear(self):
+        if(self.getMag() > 30):
+            return true
+        return false
+    
+    # Check if getting close to no-enter radius
+    def checkMagDanger(self):
+        if(self.getMag() > 60):
+            return true
+        return false
+    
     def cleanup(self):
         BP.reset_all()
         # self.scan1Thread.join()
