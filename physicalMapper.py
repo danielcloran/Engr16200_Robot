@@ -1,8 +1,12 @@
 import brickpi3
 import grovepi
 import math
+import sys
+import time
+from MPU9250 import MPU9250
 
 BP = brickpi3.BrickPi3()
+mpu = MPU9250()
 
 wheel_d = 7
 
@@ -85,7 +89,6 @@ class PhysicalMapper:
                 with open("wallPos.txt","a") as fh:
                     fh.write(str(self.robot.x + x_diff) + "," + str(self.robot.y + y_diff)+ "\n")
 
-
     def turn(self,direction):
         if direction == 'left':
             BP.set_motor_power(BP.PORT_C, -motor_power)
@@ -93,6 +96,41 @@ class PhysicalMapper:
         else:
             BP.set_motor_power(BP.PORT_C, motor_power)
             BP.set_motor_power(BP.PORT_B, -motor_power)
+    
+    # Magnetic magnitude
+    def getMag(self):
+        mag = mpu.readMagnet()
+        magX = mag['x']
+        magY = mag['y']
+        magZ = mag['z']
+        magnitude = sqrt(magX ** 2 + magY ** 2 + magZ ** 2)
+        return magnitude
+    
+    # Magnetic x vector component
+    def getMagX(self):
+        mag = mpu.readMagnet()
+        return mag['x']
+    
+    # Magnetic y vector component
+    def getMagY(self):
+        mag = mpu.readMagnet()
+        return mag['y']
+    
+    # Magnetic z vector component
+    def getMagZ(self):
+        mag = mpu.readMagnet()
+        return mag['z']
+    
+    # Unit vector in direction of magnetic field
+    def getMagUnitVector(self):
+        mm = self.getMag()
+        mx = self.getMagX()
+        my = self.getMagY()
+        mz = self.getMagZ()
+        return mx / mm, my / mm, mz / mm
+        
+        
+        
 
     def cleanup(self):
         BP.reset_all()
