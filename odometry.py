@@ -15,6 +15,13 @@ class Robot:
         self.x = 0
         self.y = 0
         self.theta = 0
+        
+        self.mag = 0
+        self.magx = 0
+        self.magy = 0
+        self.magz = 0
+        self.maglocx = 0
+        self.maglocy = 0
 
         self.physical = PhysicalMapper(self)
 
@@ -64,6 +71,58 @@ class Robot:
                 self.physical.drive(25)
         except KeyboardInterrupt:
             self.physical.cleanup()
-
+    
+    # Test magnetic readouts
+    def magReadTest(self):
+        try:
+            while True:
+                self.theta = self.physical.getHeading()
+                self.mag = self.physical.getMag()
+                self.magx = self.physical.getMagX()
+                self.magy = self.physical.getMagY()
+                self.magz = self.physical.getMagZ()
+                
+                print('Theta: ', self.theta, ' Mag: ', self.mag, ' X: ', self.magx, ' Y: ', self.magy, 'Z: ', self.magz)
+                
+                if(self.physical.checkMagNear):
+                    print('Magnet Near')
+                else:
+                    print('Magnet Not Near')
+                
+                if(self.physical.checkMagDanger):
+                    print('Danger Zone Close')
+                else:
+                    print('Danger Zone Not Close')
+        except KeyboardInterrupt:
+            self.physical.cleanup()
+            
+    # Test guessing magnet location and avoiding while driving
+    def magDriveTest(self):
+        try:
+            while True:
+                self.theta = self.physical.getHeading()
+                self.mag = self.physical.getMag()
+                self.magx = self.physical.getMagX()
+                self.magy = self.physical.getMagY()
+                self.magz = self.physical.getMagZ()
+                
+                self.physical.drive(25)
+                
+                if(self.physical.checkMagNear):
+                    self.maglocx, self.maglocy = self.physical.markMagnet(self.x, self.y, self.theta)
+                    print('Robot Pos: ', self.x, ' ', self.y, '   Magnet Location Guess: ', self.maglocx, ' ', self.maglocy)
+                
+                if(self.physical.checkMagDanger):
+                    print('Avoiding Magnet')
+                    self.physical.drive(-25)
+                    time.sleep(1.5)
+                    self.physical.drive(25)
+                    self.physical.turnUntil(self.theta + 10)
+                    print('Resume Driving')
+                
+        except KeyboardInterrupt:
+            self.physical.cleanup()
+            
+            
 robot = Robot()
 robot.test()
