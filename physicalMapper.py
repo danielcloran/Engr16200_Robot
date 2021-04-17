@@ -3,7 +3,7 @@ import grovepi
 import math
 import sys
 import time
-from MPU9250 import MPU9250
+from IMUCode.MPU9250 import MPU9250
 
 BP = brickpi3.BrickPi3()
 mpu = MPU9250()
@@ -65,15 +65,33 @@ class PhysicalMapper:
         tmpX, tmpY = self.getDeltaXY(delta1Pos, delta2Pos, theta)
         return x+tmpX, y+tmpY
 
-    def drive(self, power):
-        BP.set_motor_power(BP.PORT_C, power+1)
-        BP.set_motor_power(BP.PORT_B, power)
-        
+    def drive(self, power, adjL = 0, adjR = 0):
+        BP.set_motor_power(BP.PORT_C, adjL + power)
+        BP.set_motor_power(BP.PORT_B, adjR + power)
+
     def getUltrasonic(self):
         return grovepi.ultrasonicRead(ultrasonic_1)
 
     def getHeading(self):
         return BP.get_sensor(GYRO_SENSE)[0]
+
+    def driveStraight(self, power, initialHeading, locToStop):
+        kp = 1.5
+        try:
+            while True:
+                err = initialHeading - self.getHeading()
+                p_gain = kp * err
+                print('err: ', err)
+                p_gain = (kp * abs(err))
+                print('p_gain: ', p_gain)
+                if err > 1:
+                    self.drive(power, -p_gain, p_gain)
+                elif err < -1:
+                    self.drive(power, p_gain, -p_gain)
+                else:
+                    self.drive(power, p_gain, p_gain)
+        except KeyboardInterrupt:
+            BP.reset_all()
 
     def stopAndTakeMeasurements(self):
         final_heading = self.robot.theta + 359
@@ -96,7 +114,7 @@ class PhysicalMapper:
         else:
             BP.set_motor_power(BP.PORT_C, motor_power)
             BP.set_motor_power(BP.PORT_B, -motor_power)
-            
+
     def turnUntil(self, deg):
         current_heading = self.getHeading()
         if(deg < current_heading):
@@ -107,38 +125,38 @@ class PhysicalMapper:
             while current_heading <= deg:
                 self.turn('left')
                 current_heading = self.getHeading()
-    
+
     # Magnetic magnitude
     def getMag(self):
         mag = mpu.readMagnet()
-        magX = mag['x']
-        magY = mag['y']
-        magZ = mag['z']
-        magnitude = sqrt(magX ** 2 + magY ** 2 + magZ ** 2)
+        self.magX = mag['x']
+        self.magY = mag['y']
+        self.magZ = mag['z']
+        magnitude = math.sqrt(self.magX ** 2 + self.magY ** 2 + self.magZ ** 2)
         return magnitude
-    
+
     # Magnetic x vector component
     def getMagX(self):
-        mag = mpu.readMagnet()
-        return mag['x']
-    
+        return self.magX
+
     # Magnetic y vector component
     def getMagY(self):
-        mag = mpu.readMagnet()
-        return mag['y']
-    
+        return self.magY
+
     # Magnetic z vector component
     def getMagZ(self):
-        mag = mpu.readMagnet()
-        return mag['z']
-    
+        return self.magZ
+
     # Scalar distance to nearby magnet
     def magDist(self):
         #B = mu0M/(4piR^3) = K/R^3 --> R = (K/B)^(1/3)
         k = 1 #can maybe experimentally find K?
-        r = (k / self.getMag) ** (1/3)
+        mag = self.getMag()
+        r = 0
+        if mag != 0:
+            r = (k / self.getMag()) ** (1/3)
         return r
-    
+
     # Guess magnet position as some distance in front of robot
     def markMagnet(self, x, y, theta):
         deltaX = self.magDist() * math.cos(math.radians(theta))
@@ -146,17 +164,17 @@ class PhysicalMapper:
         return x + deltaX, y + deltaY
 
     # Check if magnet is nearby to guess location
-    def checkMagNear(self):
-        if(self.getMag() > 30):
-            return true
-        return false
-    
+    def checkMagNear(self, mag):
+        if(abs(100 - mag) > 30):
+            return True
+        return False
+
     # Check if getting close to no-enter radius
-    def checkMagDanger(self):
-        if(self.getMag() > 60):
-            return true
-        return false
-    
+    def checkMagDanger(self, mag):
+        if(abs(100 - mag) > 60):
+            return True
+        return False
+
     def cleanup(self):
         BP.reset_all()
         # self.scan1Thread.join()
