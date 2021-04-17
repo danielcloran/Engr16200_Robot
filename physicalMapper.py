@@ -96,6 +96,17 @@ class PhysicalMapper:
         else:
             BP.set_motor_power(BP.PORT_C, motor_power)
             BP.set_motor_power(BP.PORT_B, -motor_power)
+            
+    def turnUntil(self, deg):
+        current_heading = self.getHeading()
+        if(deg < current_heading):
+            while current_heading >= deg:
+                self.turn('right')
+                current_heading = self.getHeading()
+        else:
+            while current_heading <= deg:
+                self.turn('left')
+                current_heading = self.getHeading()
     
     # Magnetic magnitude
     def getMag(self):
