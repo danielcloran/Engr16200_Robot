@@ -77,22 +77,22 @@ class Robot:
         try:
             while True:
                 self.theta = self.physical.getHeading()
+                self.physical.updateMag()
                 self.mag = self.physical.getMag()
-                self.magx = self.physical.getMagX()
-                self.magy = self.physical.getMagY()
-                self.magz = self.physical.getMagZ()
 
-                print('Theta: ', self.theta, ' Mag: ', self.mag, ' X: ', self.magx, ' Y: ', self.magy, 'Z: ', self.magz)
+                print('Theta: ', self.theta, ' Mag: ', self.physical.getMag(), ' X: ', self.physical.getMagX(), ' Y: ', self.physical.getMagY(), 'Z: ', self.physical.getMagZ())
 
-                if(self.physical.checkMagNear):
+                if(self.physical.checkMagNear()):
                     print('Magnet Near')
                 else:
                     print('Magnet Not Near')
 
-                if(self.physical.checkMagDanger):
+                if(self.physical.checkMagDanger()):
                     print('Danger Zone Close')
                 else:
                     print('Danger Zone Not Close')
+                    
+                time.sleep(0.01)
         except KeyboardInterrupt:
             self.physical.cleanup()
 
@@ -101,25 +101,23 @@ class Robot:
         try:
             while True:
                 self.theta = self.physical.getHeading()
-                self.mag = self.physical.getMag()
-                self.magx = self.physical.getMagX()
-                self.magy = self.physical.getMagY()
-                self.magz = self.physical.getMagZ()
+                self.physical.updateMag()
 
                 self.physical.drive(25)
-                print('Magnitude: ', self.mag)
-                if(self.physical.checkMagNear(self.mag)):
+                print('Magnitude: ', self.physical.getMag())
+                if(self.physical.checkMagNear()):
                     self.maglocx, self.maglocy = self.physical.markMagnet(self.x, self.y, self.theta)
                     print('Robot Pos: ', self.x, ' ', self.y, '   Magnet Location Guess: ', self.maglocx, ' ', self.maglocy)
 
-                if(self.physical.checkMagDanger(self.mag)):
+                if(self.physical.checkMagDanger()):
                     print('Avoiding Magnet')
                     self.physical.drive(-25)
-                    time.sleep(1.5)
+                    time.sleep(1)
                     self.physical.drive(25)
                     self.physical.turnUntil(self.theta + 10)
                     print('Resume Driving')
-
+                    
+               time.sleep(0.01)
         except KeyboardInterrupt:
             self.physical.cleanup()
 
