@@ -7,7 +7,7 @@ END = '\033[0m'
 BOLD = '\033[1m'
 
 class MapOutputter:
-    def __init__(self, robot):
+    def __init__(self):
         self.x = []
         self.y = []
 
@@ -18,18 +18,18 @@ class MapOutputter:
 
     def Wall(self):
         for x in range(10):
-            print(MapOutputter.BOLD + "X" + MapOutputter.END)
+            print(BOLD + "X" + END)
 
     def Path(self):
-        print(MapOutputter.PATH + "X" + MapOutputter.END)
+        print(PATH + "|" + END)
 
     def Magnet(self):
-        print(MapOutputter.MAGNET + MapOutputter.BOLD + "X" + MapOutputter.END)
+        print(MAGNET + BOLD + "1" + END)
 
     def Heat(self):
-        print(MapOutputter.HEAT + MapOutputter.BOLD + "X" + MapOutputter.END)
+        print(HEAT + BOLD + "2" + END)
 
-    printMap(self):
+    # printMap(self):
 
 mapOutputter = MapOutputter()
 mapOutputter.Wall()
