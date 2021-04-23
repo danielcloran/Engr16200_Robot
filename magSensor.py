@@ -14,10 +14,10 @@ magZ = 0
 
 class magSensor:
     def __init__(self):    
-        mag = 0
-        magX = 0
-        magY = 0
-        magZ = 0
+        self.mag = 0
+        self.magX = 0
+        self.magY = 0
+        self.magZ = 0
 
     # Update magnetic readings
     def updateMag(self):
