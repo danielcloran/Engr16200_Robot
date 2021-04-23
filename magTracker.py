@@ -1,9 +1,9 @@
 import time
 import grovepi
 import math
-from physicalMapper import *
+from magSensor import *
 
-class MagTracker:
+class magTracker:
     def __init__(self):
         self.beacon_intensity = []
         self.hazardsList = {}
@@ -19,7 +19,7 @@ class MagTracker:
             if self.dataInBeacon == True and sensor_mag == 0:
                 self.beaconNumber += 1
                 self.dataInBeacon = False
-                self.hazardsList[self.beaconNumber] = Beacon()
+                self.hazardsList[self.beaconNumber] = magnet()
                 
             if magDiff() > 20:
                 self.dataInBeacon = True
@@ -29,7 +29,7 @@ class MagTracker:
         except Exception as err:
             print(err)
 
-class Beacon:
+class magnet:
     def __init__(self):
         self.x = 0
         self.y = 0
@@ -43,13 +43,8 @@ class Beacon:
         x_sum = 0
         y_sum = 0
         for i in self.intesities:
-            dist = magDist();
-
-            x_dist = math.cos(i['theta']) * dist
-            y_dist = math.sin(i['theta']) * dist
-
-            x_sum = i['x'] + x_dist
-            y_sum = i['y'] + y_dist
+            
+            x_sum, y_sum = markMagnet(robot_x, robot_y, theta)
 
         self.x = x_sum / len(self.intesities)
         self.y = y_sum / len(self.intesities)
