@@ -48,3 +48,13 @@ class MapOutputter:
 
     def Heat(self):
         print(HEAT + BOLD + "2" + END)
+
+    def printMap(self):
+        # Team #
+        # Map #
+        # Unit Length
+        # Unit
+        # Origin
+        # Notes
+        #Map
+        print('hi')
