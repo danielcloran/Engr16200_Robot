@@ -43,5 +43,8 @@ class MapOutputter:
     def Magnet(self):
         print(MAGNET + BOLD + "3" + END)
 
+    def setHeat(self, x, y):
+        pointList.append({'x':x, 'y':y, 'value':2})
+
     def Heat(self):
         print(HEAT + BOLD + "2" + END)
