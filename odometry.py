@@ -38,11 +38,11 @@ class Robot:
         leftOpen = False
         middleOpen = False
         rightOpen = False
-        if (ultrasonicReadings[0] < 30):
+        if (ultrasonicReadings[0] > 30):
             leftOpen = True
-        if (ultrasonicReadings[1] < 30):
+        if (ultrasonicReadings[1] > 30):
             rightOpen = True
-        if (ultrasonicReadings[2] < 30):
+        if (ultrasonicReadings[2] > 30):
             middleOpen = True
         return leftOpen, middleOpen, rightOpen
 
@@ -66,20 +66,25 @@ class Robot:
                 ultrasonicReadings = self.physical.getUltrasonic()
                 turnable = determineOpenSides(ultrasonicReadings)
 
-                # T intersection
-                if (turnable[0] and turnable[2]):
-                # t intersection
-                if (turnable[0] and turnable[2]):
+                self.physical.driveStraight(30, intendedAngle)
+
+                # If ANY right turn is available
+                if turnable[2]:
+                    self.theta = self.turnUntil(self.theta-90)
+                    intendedAngle = self.theta
+                # If ONLY left turn is available
+                elif turnable[0] and not turnable[1]:
+                    self.theta = self.turnUntil(self.theta+90)
+                    intendedAngle = self.theta
+                # DEAD END
+                elif not turnable[0] and not turnable[1] and not turnable[2]:
+                    self.theta = self.turnUntil(self.theta+180)
+                    intendedAngle = self.theta
+
+
                 #print('x:', self.x, 'y:', self.y, 'theta:', self.theta)
                 #print('ultrasonic: ', ultrasonicReadings)
                 #print('ir:', self.irHazards)
-                self.physical.driveStraight(30, intendedAngle)
-                if (notTurned and self.x > 80):
-                    print('TURNING')
-                    notTurned = False
-                    self.theta = self.turnUntil(-40)
-                    intendedAngle = -90
-
                 ir_counter += 1
                 time.sleep(0.01)
 
