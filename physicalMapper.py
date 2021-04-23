@@ -40,9 +40,11 @@ motor_power = 20
 
 # Init sensor readings
 sensorData = 0
-while not sensorData:
+sensorData2 = 0
+while not sensorData and not sensorData2:
     try:
-        sensorData = BP.get_sensor(BP.PORT_1)   # print the gyro sensor values
+        sensorData = BP.get_sensor(GYRO_SENSE)   # print the gyro sensor values
+        sensorData2 = BP.get_sensor(ULTRASONIC_LEFT)   # print the gyro sensor values
     except brickpi3.SensorError as error:
         print(error)
 
@@ -75,30 +77,25 @@ class PhysicalMapper:
         BP.set_motor_power(BP.PORT_B, adjR + power)
 
     def getUltrasonic(self):
-        return BP.get_sensor(BP.ULTRASONIC_LEFT),
-               grovepi.ultrasonicRead(ultrasonic_right),
-               grovepi.ultrasonicRead(ultrasonic_middle)
+        return BP.get_sensor(ULTRASONIC_LEFT), grovepi.ultrasonicRead(ultrasonic_middle), grovepi.ultrasonicRead(ultrasonic_right)
 
 
 
     def getHeading(self):
         return BP.get_sensor(GYRO_SENSE)[0]
 
-    def driveStraight(self, power, initialHeading, locToStop):
+    def driveStraight(self, power, initialHeading):
         kp = 1.5
         try:
-            while True:
-                err = initialHeading - self.getHeading()
-                p_gain = kp * err
-                print('err: ', err)
-                p_gain = (kp * abs(err))
-                print('p_gain: ', p_gain)
-                if err > 1:
-                    self.drive(power, -p_gain, p_gain)
-                elif err < -1:
-                    self.drive(power, p_gain, -p_gain)
-                else:
-                    self.drive(power, p_gain, p_gain)
+            err = initialHeading - self.getHeading()
+            p_gain = kp * err
+            p_gain = (kp * abs(err))
+            if err > 1:
+                self.drive(power, -p_gain, p_gain)
+            elif err < -1:
+                self.drive(power, p_gain, -p_gain)
+            else:
+                self.drive(power, p_gain, p_gain)
         except KeyboardInterrupt:
             BP.reset_all()
 

@@ -53,16 +53,18 @@ class IRTracker:
     def getHazards(self, x_pos, y_pos, theta):
         try:
             [sensor1_value, sensor2_value] = IR_Read(grovepi)
+            print('s1:',sensor1_value,'s2:',sensor2_value )
             sensor_mag = math.sqrt(sensor1_value**2 + sensor2_value**2)
 
-            if sensor1_value > 0 or sensor2_value > 0:
-                self.dataInBeacon = True
-                self.hazardsList[len(self.hazardsList)-1].update()
             if self.dataInBeacon == True and sensor1_value == 0 and sensor2_value == 0:
-                self.beacon_number += 1
+                self.beaconNumber += 1
                 self.dataInBeacon = False
                 self.hazardsList[self.beaconNumber] = Beacon()
-
+                
+            if sensor1_value > 0 or sensor2_value > 0:
+                self.dataInBeacon = True
+                self.hazardsList[len(self.hazardsList)-1].update(theta, sensor_mag, x_pos, y_pos)
+            #print('Getting IR x: ', self.hazardsList[0].x, 'y:', self.hazardsList[0].y)
             return self.hazardsList
         except Exception as err:
             print(err)
@@ -77,17 +79,17 @@ class Beacon:
         return [self.sensor1_value, self.sensor2_value]   # returns latest readings from sensor 1 and 2
 
     def update(self, theta, sensor_mag, robot_x, robot_y):
-        self.intesities.append({'x': robot_x, 'y': robot_y, 'theta': theta, 'mag': sensor_mag)
+        self.intesities.append({'x': robot_x, 'y': robot_y, 'theta': theta, 'mag': sensor_mag})
         x_sum = 0
         y_sum = 0
         for i in self.intesities:
-            dist = IR_SLOPE * i.mag + IR_Y_INTERCEPT
+            dist = IR_SLOPE * i['mag'] + IR_Y_INTERCEPT
 
-            x_dist = math.cos(i.theta) * dist
-            y_dist = math.sin(i.theta) * dist
+            x_dist = math.cos(i['theta']) * dist
+            y_dist = math.sin(i['theta']) * dist
 
-            x_sum = i.x + x_dist
-            y_sum = i.y + y_dist
+            x_sum = i['x'] + x_dist
+            y_sum = i['y'] + y_dist
 
         self.x = x_sum / len(self.intesities)
         self.y = y_sum / len(self.intesities)
