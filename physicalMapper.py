@@ -46,7 +46,8 @@ while not sensorData and not sensorData2:
         sensorData = BP.get_sensor(GYRO_SENSE)   # print the gyro sensor values
         sensorData2 = BP.get_sensor(ULTRASONIC_LEFT)   # print the gyro sensor values
     except brickpi3.SensorError as error:
-        print(error)
+        pass
+        #print(error)
 
 class PhysicalMapper:
     def __init__(self, robot):
@@ -84,15 +85,21 @@ class PhysicalMapper:
     def getHeading(self):
         return BP.get_sensor(GYRO_SENSE)[0]
 
-    def driveStraight(self, power, initialHeading):
+    def driveStraight(self, power, initialHeading, turnable, ultrasonicReadings):
         kp = 1.5
+        kp_wall = 1.5
         try:
+            #if (not turnable[0] and not turnable[2]):
+            #    err = ultrasonicReadings[0] - ultrasonicReadings[2]
+            #    p_gain = kp_wall * abs(err)
+            #    print('Using Wall')
+
             err = initialHeading - self.getHeading()
-            p_gain = kp * err
-            p_gain = (kp * abs(err))
-            if err > 1:
+            p_gain = kp * abs(err)
+
+            if err > 0:
                 self.drive(power, -p_gain, p_gain)
-            elif err < -1:
+            elif err < 0:
                 self.drive(power, p_gain, -p_gain)
             else:
                 self.drive(power, p_gain, p_gain)
@@ -115,11 +122,13 @@ class PhysicalMapper:
 
     def turn(self,direction):
         if direction == 'left':
-            BP.set_motor_power(BP.PORT_C, -motor_power)
-            BP.set_motor_power(BP.PORT_B, motor_power)
+            #BP.set_motor_power(BP.PORT_C, -motor_power)
+            BP.set_motor_power(BP.PORT_C, 0)
+            BP.set_motor_power(BP.PORT_B, 40)
         else:
-            BP.set_motor_power(BP.PORT_C, motor_power)
-            BP.set_motor_power(BP.PORT_B, -motor_power)
+            BP.set_motor_power(BP.PORT_C, 40)
+            BP.set_motor_power(BP.PORT_B, 0)
+            #BP.set_motor_power(BP.PORT_B, -motor_power)
 
     def turnUntil(self, deg):
         current_heading = self.getHeading()

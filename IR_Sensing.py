@@ -53,14 +53,14 @@ class IRTracker:
     def getHazards(self, x_pos, y_pos, theta):
         try:
             [sensor1_value, sensor2_value] = IR_Read(grovepi)
-            print('s1:',sensor1_value,'s2:',sensor2_value )
+            # print('s1:',sensor1_value,'s2:',sensor2_value )
             sensor_mag = math.sqrt(sensor1_value**2 + sensor2_value**2)
 
             if self.dataInBeacon == True and sensor1_value == 0 and sensor2_value == 0:
                 self.beaconNumber += 1
                 self.dataInBeacon = False
                 self.hazardsList[self.beaconNumber] = Beacon()
-                
+
             if sensor1_value > 0 or sensor2_value > 0:
                 self.dataInBeacon = True
                 self.hazardsList[len(self.hazardsList)-1].update(theta, sensor_mag, x_pos, y_pos)

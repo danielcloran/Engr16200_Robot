@@ -34,16 +34,16 @@ class Robot:
         with open("robotPos.txt","w") as fh:
             fh.write(str(x) + "," + str(y)+ "\n")
 
-    def determineOpenSides(ultrasonicList):
+    def determineOpenSides(self, ultrasonicList):
         leftOpen = False
         middleOpen = False
         rightOpen = False
-        if (ultrasonicReadings[0] > 30):
+        if (ultrasonicList[0] > 25):
             leftOpen = True
-        if (ultrasonicReadings[1] > 30):
-            rightOpen = True
-        if (ultrasonicReadings[2] > 30):
+        if (ultrasonicList[1] > 25):
             middleOpen = True
+        if (ultrasonicList[2] > 25):
+            rightOpen = True
         return leftOpen, middleOpen, rightOpen
 
     def run(self):
@@ -53,39 +53,50 @@ class Robot:
         intendedAngle = 0
         notTurned = True
         turnable = [False, False, False]
+        sameRightTurn = False
         while True:
             try:
                 self.theta = self.physical.getHeading()
                 self.x, self.y = self.physical.updatePosition(self.x, self.y, self.theta)
+                self.mapper.setPath(self.x, self.y)
 
-                if (ir_counter == ir_interrupt):
-                    self.irHazards = self.irTracker.getHazards(self.x, self.y, self.theta)
-                    ir_counter = 0
+                #if (ir_counter == ir_interrupt):
+                #    self.irHazards = self.irTracker.getHazards(self.x, self.y, self.theta)
+                #    ir_counter = 0
 
                 #self.magneticHazards = self.magnetic.getHazards(self.x, self.y, self.theta)
                 ultrasonicReadings = self.physical.getUltrasonic()
-                turnable = determineOpenSides(ultrasonicReadings)
+                turnable = self.determineOpenSides(ultrasonicReadings)
+                #print(turnable)
 
-                self.physical.driveStraight(30, intendedAngle)
+
+                self.physical.driveStraight(30, intendedAngle, turnable, ultrasonicReadings)
+                if not turnable[2]: sameRightTurn = False
 
                 # If ANY right turn is available
-                if turnable[2]:
-                    self.theta = self.turnUntil(self.theta-90)
-                    intendedAngle = self.theta
+                if turnable[2] and not sameRightTurn:
+                    sameRightTurn = True
+                    print('RIGHT TURN')
+                    newAngle = self.theta-90
+                    self.theta = self.turnUntil(newAngle)
+                    intendedAngle = newAngle
                 # If ONLY left turn is available
                 elif turnable[0] and not turnable[1]:
-                    self.theta = self.turnUntil(self.theta+90)
-                    intendedAngle = self.theta
+                    newAngle = self.theta+90
+                    print('LEFT TURN')
+                    self.theta = self.turnUntil(newAngle)
+                    intendedAngle = newAngle
                 # DEAD END
                 elif not turnable[0] and not turnable[1] and not turnable[2]:
+                    print('NO OPTIONS 180')
+
                     self.theta = self.turnUntil(self.theta+180)
                     intendedAngle = self.theta
-
 
                 #print('x:', self.x, 'y:', self.y, 'theta:', self.theta)
                 #print('ultrasonic: ', ultrasonicReadings)
                 #print('ir:', self.irHazards)
-                ir_counter += 1
+                #ir_counter += 1
                 time.sleep(0.01)
 
             except Exception as err:
@@ -104,7 +115,7 @@ class Robot:
             while current_heading <= deg:
                 self.physical.turn('left')
                 current_heading = self.physical.getHeading()
-            return current_heading;
+        return current_heading;
 
     def test(self):
         try:
