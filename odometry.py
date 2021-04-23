@@ -48,8 +48,8 @@ class Robot:
 
     def run(self):
         # main logic
-        ir_interrupt = 10
-        ir_counter = 0
+        mili_interrupt = 10
+        mili_counter = 0
         intendedAngle = 0
         notTurned = True
         turnable = [False, False, False]
@@ -58,11 +58,11 @@ class Robot:
             try:
                 self.theta = self.physical.getHeading()
                 self.x, self.y = self.physical.updatePosition(self.x, self.y, self.theta)
-                self.mapper.setPath(self.x, self.y)
 
-                #if (ir_counter == ir_interrupt):
-                #    self.irHazards = self.irTracker.getHazards(self.x, self.y, self.theta)
-                #    ir_counter = 0
+                if (mili_counter == mili_interrupt):
+                    self.irHazards = self.irTracker.getHazards(self.x, self.y, self.theta)
+                    mili_counter = 0
+                    self.mapper.setPath(self.x, self.y)
 
                 #self.magneticHazards = self.magnetic.getHazards(self.x, self.y, self.theta)
                 ultrasonicReadings = self.physical.getUltrasonic()
@@ -70,7 +70,7 @@ class Robot:
                 #print(turnable)
 
 
-                self.physical.driveStraight(30, intendedAngle, turnable, ultrasonicReadings)
+                #self.physical.driveStraight(30, intendedAngle, turnable, ultrasonicReadings)
                 if not turnable[2]: sameRightTurn = False
 
                 # If ANY right turn is available
@@ -96,7 +96,7 @@ class Robot:
                 #print('x:', self.x, 'y:', self.y, 'theta:', self.theta)
                 #print('ultrasonic: ', ultrasonicReadings)
                 #print('ir:', self.irHazards)
-                #ir_counter += 1
+                mili_counter += 1
                 time.sleep(0.01)
 
             except Exception as err:
