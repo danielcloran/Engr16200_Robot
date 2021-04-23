@@ -11,7 +11,7 @@ class magTracker:
         self.beacon_intensity = []
         self.hazardsList = {}
         self.beaconNumber = 0
-        self.dataInBeacon = False
+        self.magnetNear = False
         self.mag = 0
         self.magX = 0
         self.magY = 0
@@ -23,13 +23,13 @@ class magTracker:
             self.updateMag();
             print('mag: ', self.mag)
 
-            if self.dataInBeacon == True and self.mag == 0:
+            if self.magnetNear == True and self.mag == 0:
                 self.beaconNumber += 1
-                self.dataInBeacon = False
+                self.magnetNear = False
                 self.hazardsList[self.beaconNumber] = magnet()
                 
-            if magDiff() > 20:
-                self.dataInBeacon = True
+            if self.checkMagNear():
+                self.magnetNear = True
                 self.hazardsList[len(self.hazardsList)-1].update(theta, self.mag, x_pos, y_pos)
             #print('Getting Mag x: ', self.hazardsList[0].x, 'y:', self.hazardsList[0].y)
             return self.hazardsList
@@ -83,7 +83,7 @@ class magTracker:
 
     # Check if magnet is nearby to guess location
     def checkMagNear(self):
-        if(self.magDiff() > 30):
+        if(self.magDiff() > 20):
             return True
         return False
 
