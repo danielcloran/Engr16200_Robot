@@ -1,5 +1,6 @@
 import time
 from physicalMapper import PhysicalMapper
+from IR_Sensing import IRTracker
 import math
 
 # Constants
@@ -11,6 +12,7 @@ class Robot:
     def __init__(self):
         self.width = 14
         self.wheel_d = 7
+        self.irTracker = IRTracker()
 
         self.x = 0
         self.y = 0
@@ -34,11 +36,14 @@ class Robot:
         while True:
             try:
                 self.theta = physical.getHeading()
-                #self.pointsToAvoid = magnetic.getPoints()
                 self.x, self.y = physical.updatePosition(self.x, self.y, self.theta)
 
-                self.savePosToFile()
-                time.sleep(0.01)
+                self.irHazards = self.irTracker.getHazards(self.x, self.y, self.theta)
+                #self.magneticHazards = magnetic.getHazards(self.x, self.y, self.theta)
+                ultrasonicReadings = self.physical.getUltrasonic()
+                print('x:' self.x, 'y:' self.y, 'theta:', self.theta)
+
+                time.sleep(0.1)
 
             except KeyboardInterrupt as err:
                 self.physical.cleanup()
@@ -91,7 +96,7 @@ class Robot:
                     print('Danger Zone Close')
                 else:
                     print('Danger Zone Not Close')
-                    
+
                 time.sleep(0.01)
         except KeyboardInterrupt:
             self.physical.cleanup()
@@ -116,7 +121,7 @@ class Robot:
                     self.physical.drive(25)
                     self.physical.turnUntil(self.theta + 10)
                     print('Resume Driving')
-                    
+
                time.sleep(0.01)
         except KeyboardInterrupt:
             self.physical.cleanup()

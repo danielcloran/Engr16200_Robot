@@ -19,8 +19,11 @@ MOTOR_ONE = BP.PORT_C
 MOTOR_TWO = BP.PORT_B
 GYRO_SENSE = BP.PORT_1
 
+ULTRASONIC_LEFT = BP.PORT_2
+
 grovepi.set_bus("RPI_1")
-ultrasonic_1 = 2
+ultrasonic_middle = 2
+ultrasonic_right = 8
 
 BP.reset_all()
 
@@ -31,6 +34,7 @@ BP.offset_motor_encoder(MOTOR_TWO, BP.get_motor_encoder(MOTOR_TWO) )
 BP.set_motor_limits(MOTOR_TWO, power=50, dps=200)
 
 BP.set_sensor_type(GYRO_SENSE, BP.SENSOR_TYPE.EV3_GYRO_ABS_DPS)
+BP.set_sensor_type(ULTRASONIC_LEFT, BP.SENSOR_TYPE.EV3_ULTRASONIC_CM)
 
 motor_power = 20
 
@@ -45,10 +49,6 @@ while not sensorData:
 class PhysicalMapper:
     def __init__(self, robot):
         self.robot = robot
-        # Scanning Threads
-        # self.scannerOne = Scanner(self.conveyor, 1)
-        # self.scan1Thread = threading.Thread(target=self.scannerOne.startScanning, args=(), daemon=True)
-        # self.scan1Thread.start()
 
     def getChangeMotors(self):
         one = BP.get_motor_encoder(BP.PORT_C)
@@ -75,7 +75,11 @@ class PhysicalMapper:
         BP.set_motor_power(BP.PORT_B, adjR + power)
 
     def getUltrasonic(self):
-        return grovepi.ultrasonicRead(ultrasonic_1)
+        return BP.get_sensor(BP.ULTRASONIC_LEFT),
+               grovepi.ultrasonicRead(ultrasonic_right),
+               grovepi.ultrasonicRead(ultrasonic_middle)
+
+
 
     def getHeading(self):
         return BP.get_sensor(GYRO_SENSE)[0]
@@ -138,11 +142,11 @@ class PhysicalMapper:
         self.magY = m['y']
         self.magZ = m['z']
         self.mag = math.sqrt(self.magX ** 2 + self.magY ** 2 + self.magZ ** 2)
-    
+
     # Magnetic magnitude
     def getMag(self):
         return self.mag
-    
+
     # Magnetic x vector component
     def getMagX(self):
         return self.magX
@@ -158,7 +162,7 @@ class PhysicalMapper:
     # Difference between mag reading and background mag field
     def magDiff(self):
         return abs(self.getMag() - 100)
-    
+
     # Scalar distance to nearby magnet
     def magDist(self):
         # B = mu0M/(4piR^3) = K/R^3 --> R = (K/B)^(1/3)
