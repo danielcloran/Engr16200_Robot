@@ -2,6 +2,8 @@ import time
 from physicalMapper import PhysicalMapper
 from mapOutputter import MapOutputter
 from IR_Sensing import IRTracker
+from magTracker import MagTracker
+
 import math
 
 # Constants
@@ -13,6 +15,9 @@ class Robot:
         self.wheel_d = 7
         self.irTracker = IRTracker()
         self.irHazards = []
+
+        self.magTracker = MagTracker()
+        self.magHazards = []
 
         self.x = 0
         self.y = 0
@@ -61,6 +66,7 @@ class Robot:
 
                 if (mili_counter == mili_interrupt):
                     self.irHazards = self.irTracker.getHazards(self.x, self.y, self.theta)
+                    self.magHazards = self.magTracker.getHazards(self.x, self.y, self.theta)
                     mili_counter = 0
                     self.mapper.setPath(self.x, self.y)
 
@@ -116,72 +122,6 @@ class Robot:
                 self.physical.turn('left')
                 current_heading = self.physical.getHeading()
         return current_heading;
-
-    def test(self):
-        try:
-            current_heading = self.physical.getHeading()
-            while self.x <= 40:
-                self.theta = self.physical.getHeading()
-                self.x, self.y = self.physical.updatePosition(self.x, self.y, self.theta)#
-
-                print('X: ', self.x, '  Y: ', self.y)
-                self.physical.drive(25)
-
-            self.turnUntil(270)
-            # self.physical.stopAndTakeMeasurements()
-            while True:
-                self.physical.drive(25)
-        except KeyboardInterrupt:
-            self.physical.cleanup()
-
-    # Test magnetic readouts
-    def magReadTest(self):
-        try:
-            while True:
-                self.theta = self.physical.getHeading()
-                self.physical.updateMag()
-                self.mag = self.physical.getMag()
-
-                print('Theta: ', self.theta, ' Mag: ', self.physical.getMag(), ' X: ', self.physical.getMagX(), ' Y: ', self.physical.getMagY(), 'Z: ', self.physical.getMagZ())
-
-                if(self.physical.checkMagNear()):
-                    print('Magnet Near')
-                else:
-                    print('Magnet Not Near')
-
-                if(self.physical.checkMagDanger()):
-                    print('Danger Zone Close')
-                else:
-                    print('Danger Zone Not Close')
-
-                time.sleep(0.01)
-        except KeyboardInterrupt:
-            self.physical.cleanup()
-
-    # Test guessing magnet location and avoiding while driving
-    def magDriveTest(self):
-        try:
-            while True:
-                self.theta = self.physical.getHeading()
-                self.physical.updateMag()
-
-                self.physical.drive(25)
-                print('Magnitude: ', self.physical.getMag())
-                if(self.physical.checkMagNear()):
-                    self.maglocx, self.maglocy = self.physical.markMagnet(self.x, self.y, self.theta)
-                    print('Robot Pos: ', self.x, ' ', self.y, '   Magnet Location Guess: ', self.maglocx, ' ', self.maglocy)
-
-                if(self.physical.checkMagDanger()):
-                    print('Avoiding Magnet')
-                    self.physical.drive(-25)
-                    time.sleep(1)
-                    self.physical.drive(25)
-                    self.physical.turnUntil(self.theta + 10)
-                    print('Resume Driving')
-                time.sleep(0.01)
-        except KeyboardInterrupt:
-            self.physical.cleanup()
-
 
 robot = Robot()
 robot.run()

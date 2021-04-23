@@ -6,7 +6,7 @@ from IMUCode.MPU9250 import MPU9250
 
 mpu = MPU9250()
 
-class magTracker:
+class MagTracker:
     def __init__(self):
         self.beacon_intensity = []
         self.hazardsList = {}
@@ -27,7 +27,7 @@ class magTracker:
                 self.beaconNumber += 1
                 self.magnetNear = False
                 self.hazardsList[self.beaconNumber] = magnet()
-                
+
             if self.checkMagNear():
                 self.magnetNear = True
                 self.hazardsList[len(self.hazardsList)-1].update(theta, self.mag, x_pos, y_pos)
@@ -107,7 +107,7 @@ class magnet:
         x_sum = 0
         y_sum = 0
         for i in self.intesities:
-            
+
             x_sum, y_sum = markMagnet(robot_x, robot_y, theta)
 
         self.x = x_sum / len(self.intesities)
