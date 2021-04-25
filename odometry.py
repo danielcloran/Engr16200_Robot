@@ -45,7 +45,7 @@ class Robot:
         rightOpen = False
         if (ultrasonicList[0] > 25):
             leftOpen = True
-        if (ultrasonicList[1] > 25):
+        if (ultrasonicList[1] > 15):
             middleOpen = True
         if (ultrasonicList[2] > 25):
             rightOpen = True
@@ -64,52 +64,65 @@ class Robot:
                 self.theta = self.physical.getHeading()
                 self.x, self.y = self.physical.updatePosition(self.x, self.y, self.theta)
 
-                if (mili_counter == mili_interrupt):
-                    self.irHazards = self.irTracker.getHazards(self.x, self.y, self.theta)
-                    self.magHazards = self.magTracker.getHazards(self.x, self.y, self.theta)
-                    mili_counter = 0
-                    self.mapper.setPath(self.x, self.y)
+                self.mapper.setPath(self.x, self.y)
+                #self.irHazards = self.irTracker.getHazards(self.x, self.y, self.theta)
+                self.magHazards = self.magTracker.getHazards(self.x, self.y, self.theta)
 
-                #self.magneticHazards = self.magnetic.getHazards(self.x, self.y, self.theta)
+
                 ultrasonicReadings = self.physical.getUltrasonic()
+                #print('ultrasonic: ', ultrasonicReadings)
+
                 turnable = self.determineOpenSides(ultrasonicReadings)
+
+                #print(self.irHazards)
+                #for hazard in range(len(self.irHazards)):
+                    #print('Hazard '+ str(hazard) +':'+ str(self.irHazards[hazard].x) + ',' + str(self.irHazards[hazard].y))
+
                 #print(turnable)
 
 
-                #self.physical.driveStraight(30, intendedAngle, turnable, ultrasonicReadings)
+                self.physical.driveStraight(30, intendedAngle, turnable, ultrasonicReadings)
                 if not turnable[2]: sameRightTurn = False
 
                 # If ANY right turn is available
                 if turnable[2] and not sameRightTurn:
                     sameRightTurn = True
                     print('RIGHT TURN')
-                    newAngle = self.theta-90
+                    newAngle = self.theta-80
                     self.theta = self.turnUntil(newAngle)
-                    intendedAngle = newAngle
+                    intendedAngle = newAngle - 10
                 # If ONLY left turn is available
                 elif turnable[0] and not turnable[1]:
-                    newAngle = self.theta+90
+                    newAngle = self.theta+80
                     print('LEFT TURN')
                     self.theta = self.turnUntil(newAngle)
-                    intendedAngle = newAngle
+                    intendedAngle = newAngle + 10
                 # DEAD END
-                elif not turnable[0] and not turnable[1] and not turnable[2]:
+                elif self.magTracker.checkMagDanger() or not turnable[0] and not turnable[1] and not turnable[2]:
+                    print(self.magTracker.checkMagDanger())
                     print('NO OPTIONS 180')
 
-                    self.theta = self.turnUntil(self.theta+180)
-                    intendedAngle = self.theta
+                    self.turn180(self.theta + 170)
+                    intendedAngle = self.theta + 180
 
                 #print('x:', self.x, 'y:', self.y, 'theta:', self.theta)
-                #print('ultrasonic: ', ultrasonicReadings)
                 #print('ir:', self.irHazards)
                 mili_counter += 1
                 time.sleep(0.01)
 
-            except Exception as err:
-                print(err)
+            #except Exception as err:
+            #    print(err)
             except KeyboardInterrupt:
                 self.physical.cleanup()
                 break
+
+    def turn180(self, deg):
+        self.physical.drive(-50, 30)
+        time.sleep(1)
+        current_heading = self.physical.getHeading()
+        while current_heading <= deg:
+            self.physical.turnNoRadius('right')
+            current_heading = self.physical.getHeading()
 
     def turnUntil(self, deg):
         current_heading = self.physical.getHeading()

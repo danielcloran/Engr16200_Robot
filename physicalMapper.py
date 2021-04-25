@@ -34,11 +34,16 @@ motor_power = 20
 # Init sensor readings
 sensorData = 0
 sensorData2 = 0
-while not sensorData and not sensorData2:
+sensorData3 = 0
+sensorData4 = 0
+while not sensorData and not sensorData2 and not sensorData3 and not sensorData4:
     try:
         sensorData = BP.get_sensor(GYRO_SENSE)   # print the gyro sensor values
-        sensorData2 = BP.get_sensor(ULTRASONIC_LEFT)   # print the gyro sensor values
-    except brickpi3.SensorError as error:
+        sensorData2 = BP.get_sensor(ULTRASONIC_LEFT)
+        sensorData3 = grovepi.ultrasonicRead(ultrasonic_middle)
+        sensorData4 = grovepi.ultrasonicRead(ultrasonic_right)
+        
+    except Exception as error:
         pass
         #print(error)
 
@@ -111,6 +116,10 @@ class PhysicalMapper:
                 with open("wallPos.txt","a") as fh:
                     fh.write(str(self.robot.x + x_diff) + "," + str(self.robot.y + y_diff)+ "\n")
 
+    def turnNoRadius(self,direction):
+        BP.set_motor_power(BP.PORT_C, -30)
+        BP.set_motor_power(BP.PORT_B, 30)
+            
     def turn(self,direction):
         if direction == 'left':
             #BP.set_motor_power(BP.PORT_C, -motor_power)

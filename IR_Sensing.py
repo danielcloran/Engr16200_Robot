@@ -45,29 +45,28 @@ IR_setup(grovepi)
 class IRTracker:
     def __init__(self):
         self.beacon_intensity = []
-        self.hazardsList = {}
-        self.beaconNumber = 0
+        self.hazardsList = []
+        self.hazardsList.append(Beacon())
         self.dataInBeacon = False
 
     # returns a list of all known hazards
     def getHazards(self, x_pos, y_pos, theta):
-        try:
-            [sensor1_value, sensor2_value] = IR_Read(grovepi)
-            # print('s1:',sensor1_value,'s2:',sensor2_value )
-            sensor_mag = math.sqrt(sensor1_value**2 + sensor2_value**2)
+        #try:
+        [sensor1_value, sensor2_value] = IR_Read(grovepi)
+        print('s1:',sensor1_value,'s2:',sensor2_value )
+        sensor_mag = math.sqrt(sensor1_value**2 + sensor2_value**2)
 
-            if self.dataInBeacon == True and sensor1_value == 0 and sensor2_value == 0:
-                self.beaconNumber += 1
-                self.dataInBeacon = False
-                self.hazardsList[self.beaconNumber] = Beacon()
+        if self.dataInBeacon == True and sensor1_value == 0 and sensor2_value == 0:
+            self.dataInBeacon = False
+            self.hazardsList.append(Beacon())
 
-            if sensor1_value > 0 or sensor2_value > 0:
-                self.dataInBeacon = True
-                self.hazardsList[len(self.hazardsList)-1].update(theta, sensor_mag, x_pos, y_pos)
-            #print('Getting IR x: ', self.hazardsList[0].x, 'y:', self.hazardsList[0].y)
-            return self.hazardsList
-        except Exception as err:
-            print(err)
+        if len(self.hazardsList) > 0 and sensor_mag > 0:
+            self.dataInBeacon = True
+            self.hazardsList[len(self.hazardsList)-1].update(theta, sensor_mag, x_pos, y_pos)
+        #print('Getting IR x: ', self.hazardsList[0].x, 'y:', self.hazardsList[0].y)
+        return self.hazardsList
+        #except Exception as err:
+        #    print(err)
 
 class Beacon:
     def __init__(self):
@@ -88,8 +87,8 @@ class Beacon:
             x_dist = math.cos(i['theta']) * dist
             y_dist = math.sin(i['theta']) * dist
 
-            x_sum = i['x'] + x_dist
-            y_sum = i['y'] + y_dist
+            x_sum += x_dist
+            y_sum += y_dist
 
         self.x = x_sum / len(self.intesities)
         self.y = y_sum / len(self.intesities)
