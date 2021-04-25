@@ -42,7 +42,7 @@ while not sensorData and not sensorData2 and not sensorData3 and not sensorData4
         sensorData2 = BP.get_sensor(ULTRASONIC_LEFT)
         sensorData3 = grovepi.ultrasonicRead(ultrasonic_middle)
         sensorData4 = grovepi.ultrasonicRead(ultrasonic_right)
-        
+
     except Exception as error:
         pass
         #print(error)
@@ -82,20 +82,22 @@ class PhysicalMapper:
         return BP.get_sensor(GYRO_SENSE)[0]
 
     def driveStraight(self, power, initialHeading, turnable, ultrasonicReadings):
-        kp = 1.5
+        kp_angle = 1.5
         kp_wall = 1.5
         try:
-            #if (not turnable[0] and not turnable[2]):
-            #    err = ultrasonicReadings[0] - ultrasonicReadings[2]
-            #    p_gain = kp_wall * abs(err)
-            #    print('Using Wall')
+            wall_gain = 0
+            if (not turnable[0] and not turnable[2]):
+                wall_err = ultrasonicReadings[0] - ultrasonicReadings[2]
+                wall_gain = kp_wall * abs(err)
 
-            err = initialHeading - self.getHeading()
-            p_gain = kp * abs(err)
+            angle_err = initialHeading - self.getHeading()
+            angle_gain = kp_angle * abs(err)
 
-            if err > 0:
+            p_gain = angle_gain + wall_gain
+
+            if p_gain > 0:
                 self.drive(power, -p_gain, p_gain)
-            elif err < 0:
+            elif p_gain < 0:
                 self.drive(power, p_gain, -p_gain)
             else:
                 self.drive(power, p_gain, p_gain)
@@ -119,7 +121,7 @@ class PhysicalMapper:
     def turnNoRadius(self,direction):
         BP.set_motor_power(BP.PORT_C, -30)
         BP.set_motor_power(BP.PORT_B, 30)
-            
+
     def turn(self,direction):
         if direction == 'left':
             #BP.set_motor_power(BP.PORT_C, -motor_power)
@@ -143,4 +145,3 @@ class PhysicalMapper:
 
     def cleanup(self):
         BP.reset_all()
-        # self.scan1Thread.join()
