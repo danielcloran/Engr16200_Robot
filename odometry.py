@@ -30,8 +30,8 @@ class Robot:
         self.maglocx = 0
         self.maglocy = 0
 
-        #self.mapper = MapOutputter(self, map_length, map_width)
-        #self.mapper.setOrigin(self.x, self.y)
+        self.mapper = MapOutputter(self, map_length, map_width)
+        self.mapper.setOrigin(self.x, self.y)
 
         self.physical = PhysicalMapper(self)
 
@@ -64,9 +64,11 @@ class Robot:
                 self.theta = self.physical.getHeading()
                 self.x, self.y = self.physical.updatePosition(self.x, self.y, self.theta)
 
-                #self.mapper.setPath(self.x, self.y)
+                self.mapper.setPath(self.x, self.y)
                 #self.irHazards = self.irTracker.getHazards(self.x, self.y, self.theta)
-                #self.magHazards = self.magTracker.getHazards(self.x, self.y, self.theta)
+                self.magHazards = self.magTracker.getHazards(self.x, self.y, self.theta)
+                for hazard in magHazards:
+                    self.mapper.setMagnet(hazard.x, hazard.y)
 
 
                 ultrasonicReadings = self.physical.getUltrasonic()
@@ -98,7 +100,7 @@ class Robot:
                     #print('LEFT TURN')
                     self.turnUntil(intendedAngle-10)
                 # DEAD END
-                elif not turnable[0] and not turnable[1] and not turnable[2]:
+                elif self.magTracker. not turnable[0] and not turnable[1] and not turnable[2]:
                     #print('NO OPTIONS 180')
 
                     self.turn180(intendedAngle + 180)
