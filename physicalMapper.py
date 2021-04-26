@@ -36,7 +36,7 @@ sensorData = 0
 sensorData2 = 0
 sensorData3 = 0
 sensorData4 = 0
-while not sensorData and not sensorData2 and not sensorData3 and not sensorData4:
+while not sensorData or not sensorData2 or not sensorData3 or not sensorData4:
     try:
         sensorData = BP.get_sensor(GYRO_SENSE)   # print the gyro sensor values
         sensorData2 = BP.get_sensor(ULTRASONIC_LEFT)
@@ -82,25 +82,25 @@ class PhysicalMapper:
         return BP.get_sensor(GYRO_SENSE)[0]
 
     def driveStraight(self, power, initialHeading, turnable, ultrasonicReadings):
-        kp_angle = 1.5
-        kp_wall = 1.5
+        kp_angle = 1
+        kp_wall = 2
         try:
             wall_gain = 0
             if (not turnable[0] and not turnable[2]):
                 wall_err = ultrasonicReadings[0] - ultrasonicReadings[2]
-                wall_gain = kp_wall * abs(err)
+                wall_gain = kp_wall * wall_err
 
             angle_err = initialHeading - self.getHeading()
-            angle_gain = kp_angle * abs(err)
+            angle_gain = kp_angle * angle_err
 
             p_gain = angle_gain + wall_gain
 
             if p_gain > 0:
                 self.drive(power, -p_gain, p_gain)
-            elif p_gain < 0:
-                self.drive(power, p_gain, -p_gain)
+            elif angle_gain < 0:
+                self.drive(power, -p_gain, p_gain)
             else:
-                self.drive(power, p_gain, p_gain)
+                self.drive(power, 0, 0)
         except KeyboardInterrupt:
             BP.reset_all()
 
@@ -126,9 +126,9 @@ class PhysicalMapper:
         if direction == 'left':
             #BP.set_motor_power(BP.PORT_C, -motor_power)
             BP.set_motor_power(BP.PORT_C, 0)
-            BP.set_motor_power(BP.PORT_B, 40)
+            BP.set_motor_power(BP.PORT_B, 35)
         else:
-            BP.set_motor_power(BP.PORT_C, 40)
+            BP.set_motor_power(BP.PORT_C, 35)
             BP.set_motor_power(BP.PORT_B, 0)
             #BP.set_motor_power(BP.PORT_B, -motor_power)
 

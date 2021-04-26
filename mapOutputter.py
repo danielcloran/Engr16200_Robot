@@ -1,5 +1,7 @@
 import curses
 import threading
+import numpy as np
+import time
 
 PATH = '\033[92m'
 HEAT = '\033[91m'
@@ -19,9 +21,9 @@ class MapOutputter:
         self.screen.keypad(True)
 
         self.robot = robot
-        self.length = length
-        self.width = width
-        self.pointList = []
+        self.length = int(length/10)
+        self.width = int(width/10)
+        self.pointList = np.empty((self.width,self.length), dtype=object)
 
         self.priorityList = [self.Origin(), self.Heat(), self.Magnet(), self.Path(), self.Wall()]
 
@@ -29,51 +31,52 @@ class MapOutputter:
         self.printMapThread.start()
 
     def checkPriority(self, str1, x, y):
-        if self.priorityList.index(str1) < self.pointList[int(x)][int(y)]:
-            return True
-        else: return False
+        try:
+            if self.priorityList.index(str1) > self.priorityList.index(self.pointList[int(x/10),int(y/10)]):
+                return False
+        except Exception:
+            pass
+        return True
+
+    def addPoint(self, pointStr, x, y):
+        if(self.checkPriority(pointStr, x, y)):
+            self.pointList[int(x/10),int(y/10)] = pointStr
 
     def setWall(self, x, y):
-        if(self.checkPriority(self.Wall, x, y)):
-            self.pointList[int(x)][int(y)] = self.Wall()
+        addPoint(self.Wall(), x, y)
 
     def Wall(self):
-        return BOLD + "0" + END
+        return "0"##BOLD + "0" + END
 
     def setPath(self, x, y):
-        if(self.checkPriority(self.Path(), x, y)):
-            self.pointList[int(x)][int(y)] = self.Path()()
+        addPoint(self.Path(), x, y)
 
     def Path(self):
-        return PATH + "1" + END
+        return "1"#PATH + "1" + END
 
     def setOrigin(self, x, y):
-        if(self.checkPriority(self.Origin(), x, y)):
-            self.pointList[int(x)][int(y)] = self.Origin()()
+        addPoint(self.Origin(), x, y)
 
     def Origin(self):
-        return PATH + "5" + END
+        return "5"#PATH + "5" + END
 
     def setExit(self, x, y):
-        if(self.checkPriority(self.Exit(), x, y)):
-            self.pointList[int(x)][int(y)] = self.Exit()()
+        addPoint(self.Exit(), x, y)
 
     def Exit(self):
-        return PATH + "4" + END
+        return "4"#PATH + "4" + END
 
     def setMagnet(self, x, y):
-        if(self.checkPriority(self.Magnet(), x, y)):
-            self.pointList[int(x)][int(y)] = self.Magnet()()
+        addPoint(self.Magnet(), x, y)
 
     def Magnet(self):
-        return MAGNET + BOLD + "3" + END
+        return "3" # MAGNET + BOLD + "3" + END
 
     def setHeat(self, x, y):
-        if(self.checkPriority(self.Heat(), x, y)):
-            self.pointList[int(x)][int(y)] = self.Heat()()
+        addPoint(self.Heat(), x, y)
 
     def Heat(self):
-        return HEAT + BOLD + "2" + END
+        return "2" #HEAT + BOLD + "2" + END
 
     def getRanges(self):
         # ACTUAL MAP
@@ -87,18 +90,23 @@ class MapOutputter:
         rangeY = maxY - minY
         return minX, minY, rangeX, rangeY
 
-    def display_matrix(screen, m, x, y, precision=2, title=None):
+    def display_matrix(self, screen, m, x, y, precision=2, title=None):
         rows, cols = m.shape
         if title:
             screen.addstr(x, y, title)
             x += 1
-        screen.addstr(x, y, "[")
-        screen.addstr(x, cols*(4+precision)+y+1, "]")
-        screen.addstr(rows+x-1, y, "[")
-        screen.addstr(rows+x-1, cols*(4+precision)+y+1, "]")
+        #screen.addstr(x, y, "[")
+        #screen.addstr(x, cols*(4+precision)+y+1, "]")
+        #screen.addstr(rows+x-1, y, "[")
+        #screen.addstr(rows+x-1, cols*(4+precision)+y+1, "]")
         for row in range(rows):
             for col in range(cols):
-                screen.addstr(row+x, col*(4+precision)+y+1, "%+.*f," % (precision, m[row, col]))
+                if(m[row, col]):
+                    screen.addstr(row+x, col, m[row, col])
+                else:
+                    screen.addstr(row+x, col, self.Wall())
+
+                #screen.addstr(row+x, col*(4+precision)+y+1, m[row, col])
 
     def printMap(self):
         while True:
@@ -110,22 +118,7 @@ class MapOutputter:
                 self.screen.addstr(4,0,"Origin: ")
                 self.screen.addstr(5,0,"Notes: ")
 
-                display_matrix(self.screen, self.pointList, 6, 0)
-
-                #minX, minY, rangeX, rangeY = self.getRanges()
-                #yOffset = 10
-
-                #self.screen.addstr(7,0,"rangeX: " + str(rangeX))
-                #self.screen.addstr(8,0,"rangeY: " + str(rangeY))
-                #if rangeX != 0 and rangeY != 0:
-                #    for point in self.pointList:
-                #        shiftedX = int((point['x'] + abs(minX))/ rangeX) * 50
-                #        shiftedY = yOffset + int((point['y'] + abs(minY))/ rangeY) * 50
-                #        #self.screen.addstr(shiftedY,shiftedX, 'X')
-                #        self.screen.addstr(10,0, 'shiftedY:' + str(shiftedY) + ', shiftedX:' + str(shiftedX) )
-                        #self.screen.addstr(int((point['x']/maxX)*self.length),int((point['y']/maxY)*self.width), 'hello')
-                #self.screen.addstr(12,0, str(len(self.pointList)))
-
+                self.display_matrix(self.screen, self.pointList, 7, 0, 'Map!')
                 self.screen.refresh()
             except curses.error:
                 pass

@@ -45,7 +45,7 @@ class Robot:
         rightOpen = False
         if (ultrasonicList[0] > 25):
             leftOpen = True
-        if (ultrasonicList[1] > 15):
+        if (ultrasonicList[1] > 25):
             middleOpen = True
         if (ultrasonicList[2] > 25):
             rightOpen = True
@@ -58,7 +58,7 @@ class Robot:
         intendedAngle = 0
         notTurned = True
         turnable = [False, False, False]
-        sameRightTurn = False
+        sameRightTurn = 11
         while True:
             try:
                 self.theta = self.physical.getHeading()
@@ -66,7 +66,7 @@ class Robot:
 
                 self.mapper.setPath(self.x, self.y)
                 #self.irHazards = self.irTracker.getHazards(self.x, self.y, self.theta)
-                self.magHazards = self.magTracker.getHazards(self.x, self.y, self.theta)
+                #self.magHazards = self.magTracker.getHazards(self.x, self.y, self.theta)
 
 
                 ultrasonicReadings = self.physical.getUltrasonic()
@@ -82,25 +82,26 @@ class Robot:
 
 
                 self.physical.driveStraight(30, intendedAngle, turnable, ultrasonicReadings)
-                if not turnable[2]: sameRightTurn = False
+                if not turnable[2]: sameRightTurn += 1
 
                 # If ANY right turn is available
-                if turnable[2] and not sameRightTurn:
-                    sameRightTurn = True
-                    print('RIGHT TURN')
-                    newAngle = self.theta-80
-                    self.theta = self.turnUntil(newAngle)
-                    intendedAngle = newAngle - 10
+                if turnable[2] and sameRightTurn > 5:
+                    sameRightTurn = 0
+                    #print('RIGHT TURN')
+                    self.physical.driveStraight(30, intendedAngle, turnable, ultrasonicReadings)
+                    time.sleep(.2)
+                    newAngle = self.theta-90
+                    self.turnUntil(newAngle)
+                    intendedAngle = newAngle+10
                 # If ONLY left turn is available
                 elif turnable[0] and not turnable[1]:
-                    newAngle = self.theta+80
-                    print('LEFT TURN')
-                    self.theta = self.turnUntil(newAngle)
-                    intendedAngle = newAngle + 10
+                    newAngle = self.theta+90
+                    #print('LEFT TURN')
+                    self.turnUntil(newAngle)
+                    intendedAngle = newAngle-10
                 # DEAD END
-                elif self.magTracker.checkMagDanger() or not turnable[0] and not turnable[1] and not turnable[2]:
-                    print(self.magTracker.checkMagDanger())
-                    print('NO OPTIONS 180')
+                elif not turnable[0] and not turnable[1] and not turnable[2]:
+                    #print('NO OPTIONS 180')
 
                     self.turn180(self.theta + 170)
                     intendedAngle = self.theta + 180
@@ -117,8 +118,8 @@ class Robot:
                 break
 
     def turn180(self, deg):
-        self.physical.drive(-50, 30)
-        time.sleep(1)
+        self.physical.drive(-50, 40)
+        time.sleep(.6)
         current_heading = self.physical.getHeading()
         while current_heading <= deg:
             self.physical.turnNoRadius('right')
@@ -126,12 +127,12 @@ class Robot:
 
     def turnUntil(self, deg):
         current_heading = self.physical.getHeading()
-        if(deg < current_heading):
+        if(deg < current_heading-20):
             while current_heading >= deg:
                 self.physical.turn('right')
                 current_heading = self.physical.getHeading()
         else:
-            while current_heading <= deg:
+            while current_heading+20 <= deg:
                 self.physical.turn('left')
                 current_heading = self.physical.getHeading()
         return current_heading;
