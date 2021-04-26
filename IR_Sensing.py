@@ -47,7 +47,7 @@ IR_setup(grovepi)
 #        [sensor1_value, sensor2_value] = IR_Read(grovepi)
 #        print("s1: " + str(sensor1_value) + "\ts2: " + str(sensor2_value))
 #    except Exception as err:
-#            print(err) 
+#            print(err)
 
 class IRTracker:
     def __init__(self):
@@ -60,7 +60,7 @@ class IRTracker:
     def getHazards(self, x_pos, y_pos, theta):
         try:
             [sensor1_value, sensor2_value] = IR_Read(grovepi)
-            print('s1:',sensor1_value,'s2:',sensor2_value )
+            # print('s1:',sensor1_value,'s2:',sensor2_value )
             sensor_mag = math.sqrt(sensor1_value**2 + sensor2_value**2)
             self.sensor_mag = sensor_mag
 
@@ -71,7 +71,7 @@ class IRTracker:
             if len(self.hazardsList) > 0 and sensor_mag > 0:
                 self.dataInBeacon = True
                 self.hazardsList[len(self.hazardsList)-1].update(theta, sensor_mag, x_pos, y_pos)
-            print('Getting IR x: ', self.hazardsList[0].x, 'y:', self.hazardsList[0].y)
+            # print('Getting IR x: ', self.hazardsList[0].x, 'y:', self.hazardsList[0].y)
             return self.hazardsList
         except Exception as err:
             print(err)

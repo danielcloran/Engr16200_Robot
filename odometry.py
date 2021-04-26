@@ -100,9 +100,8 @@ class Robot:
                     #print('LEFT TURN')
                     self.turnUntil(intendedAngle-10)
                 # DEAD END
-                elif self.magTracker. not turnable[0] and not turnable[1] and not turnable[2]:
+                elif self.magTracker.checkIRDanger() or not turnable[0] and not turnable[1] and not turnable[2]:
                     #print('NO OPTIONS 180')
-
                     self.turn180(intendedAngle + 180)
                     intendedAngle = intendedAngle + 180
 

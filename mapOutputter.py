@@ -55,7 +55,7 @@ class MapOutputter:
     def setOrigin(self, x, y):
         if(self.checkPriority(self.Origin(), x, y)):
             self.pointList[int(x/10),int(y/10)] = self.Origin()
-            
+
     def Origin(self):
         return "5"#PATH + "5" + END
 
