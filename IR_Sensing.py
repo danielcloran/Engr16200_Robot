@@ -42,6 +42,13 @@ IR_SLOPE = -43.1
 IR_Y_INTERCEPT = 201
 IR_setup(grovepi)
 
+#while True:
+#    try:
+#        [sensor1_value, sensor2_value] = IR_Read(grovepi)
+#        print("s1: " + str(sensor1_value) + "\ts2: " + str(sensor2_value))
+#    except Exception as err:
+#            print(err) 
+
 class IRTracker:
     def __init__(self):
         self.beacon_intensity = []
@@ -51,23 +58,23 @@ class IRTracker:
 
     # returns a list of all known hazards
     def getHazards(self, x_pos, y_pos, theta):
-        #try:
-        [sensor1_value, sensor2_value] = IR_Read(grovepi)
-        print('s1:',sensor1_value,'s2:',sensor2_value )
-        sensor_mag = math.sqrt(sensor1_value**2 + sensor2_value**2)
-        self.sensor_mag = sensor_mag
+        try:
+            [sensor1_value, sensor2_value] = IR_Read(grovepi)
+            print('s1:',sensor1_value,'s2:',sensor2_value )
+            sensor_mag = math.sqrt(sensor1_value**2 + sensor2_value**2)
+            self.sensor_mag = sensor_mag
 
-        if self.dataInBeacon == True and sensor1_value == 0 and sensor2_value == 0:
-            self.dataInBeacon = False
-            self.hazardsList.append(Beacon())
+            if self.dataInBeacon == True and sensor1_value == 0 and sensor2_value == 0:
+                self.dataInBeacon = False
+                self.hazardsList.append(Beacon())
 
-        if len(self.hazardsList) > 0 and self.sensor_mag > 0:
-            self.dataInBeacon = True
-            self.hazardsList[len(self.hazardsList)-1].update(theta, self.sensor_mag, x_pos, y_pos)
-        #print('Getting IR x: ', self.hazardsList[0].x, 'y:', self.hazardsList[0].y)
-        return self.hazardsList
-        #except Exception as err:
-        #    print(err)
+            if len(self.hazardsList) > 0 and sensor_mag > 0:
+                self.dataInBeacon = True
+                self.hazardsList[len(self.hazardsList)-1].update(theta, sensor_mag, x_pos, y_pos)
+            print('Getting IR x: ', self.hazardsList[0].x, 'y:', self.hazardsList[0].y)
+            return self.hazardsList
+        except Exception as err:
+            print(err)
 
     # Check if getting close to no-enter radius
     def checkIRDanger(self):
