@@ -38,8 +38,8 @@ import grovepi
 import math
 from IR_Functions import *
 
-IR_SLOPE = -0.0878
-IR_Y_INTERCEPT = 13.8
+IR_SLOPE = -43.1
+IR_Y_INTERCEPT = 201
 IR_setup(grovepi)
 
 class IRTracker:
@@ -72,17 +72,18 @@ class Beacon:
     def __init__(self):
         self.x = 0
         self.y = 0
-        self.intesities = []
+        self.intensities = []
 
     def getIntensity(self):
         return [self.sensor1_value, self.sensor2_value]   # returns latest readings from sensor 1 and 2
 
     def update(self, theta, sensor_mag, robot_x, robot_y):
-        self.intesities.append({'x': robot_x, 'y': robot_y, 'theta': theta, 'mag': sensor_mag})
+        self.intensities.append({'x': robot_x, 'y': robot_y, 'theta': theta, 'mag': sensor_mag})
         x_sum = 0
         y_sum = 0
-        for i in self.intesities:
-            dist = IR_SLOPE * i['mag'] + IR_Y_INTERCEPT
+        for i in self.intensities:
+            if i['mag'] != 0 or i['mag'] > 106:
+                dist = IR_SLOPE * math.log(i['mag']) + IR_Y_INTERCEPT
 
             x_dist = math.cos(i['theta']) * dist
             y_dist = math.sin(i['theta']) * dist
@@ -90,7 +91,7 @@ class Beacon:
             x_sum += x_dist
             y_sum += y_dist
 
-        self.x = x_sum / len(self.intesities)
-        self.y = y_sum / len(self.intesities)
+        self.x = x_sum / len(self.intensities)
+        self.y = y_sum / len(self.intensities)
 
         return self.x, self.y
