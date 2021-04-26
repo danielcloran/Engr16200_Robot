@@ -38,42 +38,44 @@ class MapOutputter:
             pass
         return True
 
-    def addPoint(self, pointStr, x, y):
-        if(self.checkPriority(pointStr, x, y)):
-            self.pointList[int(x/10),int(y/10)] = pointStr
-
     def setWall(self, x, y):
-        addPoint(self.Wall(), x, y)
+        if(self.checkPriority(self.Wall, x, y)):
+            self.pointList[int(x/10),int(y/10)] = self.Wall()
 
     def Wall(self):
         return "0"##BOLD + "0" + END
 
     def setPath(self, x, y):
-        addPoint(self.Path(), x, y)
+        if(self.checkPriority(self.Path(), x, y)):
+            self.pointList[int(x/10),int(y/10)] = self.Path()
 
     def Path(self):
         return "1"#PATH + "1" + END
 
     def setOrigin(self, x, y):
-        addPoint(self.Origin(), x, y)
-
+        if(self.checkPriority(self.Origin(), x, y)):
+            self.pointList[int(x/10),int(y/10)] = self.Origin()
+            
     def Origin(self):
         return "5"#PATH + "5" + END
 
     def setExit(self, x, y):
-        addPoint(self.Exit(), x, y)
+        if(self.checkPriority(self.Exit(), x, y)):
+            self.pointList[int(x/10),int(y/10)] = self.Exit()
 
     def Exit(self):
         return "4"#PATH + "4" + END
 
     def setMagnet(self, x, y):
-        addPoint(self.Magnet(), x, y)
+        if(self.checkPriority(self.Magnet(), x, y)):
+            self.pointList[int(x/10),int(y/10)] = self.Magnet()
 
     def Magnet(self):
         return "3" # MAGNET + BOLD + "3" + END
 
     def setHeat(self, x, y):
-        addPoint(self.Heat(), x, y)
+        if(self.checkPriority(self.Heat(), x, y)):
+            self.pointList[int(x/10),int(y/10)] = self.Heat()
 
     def Heat(self):
         return "2" #HEAT + BOLD + "2" + END

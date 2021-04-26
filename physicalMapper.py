@@ -82,7 +82,7 @@ class PhysicalMapper:
         return BP.get_sensor(GYRO_SENSE)[0]
 
     def driveStraight(self, power, initialHeading, turnable, ultrasonicReadings):
-        kp_angle = 1
+        kp_angle = 1.5
         kp_wall = 2
         try:
             wall_gain = 0

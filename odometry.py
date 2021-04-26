@@ -30,8 +30,8 @@ class Robot:
         self.maglocx = 0
         self.maglocy = 0
 
-        self.mapper = MapOutputter(self, map_length, map_width)
-        self.mapper.setOrigin(self.x, self.y)
+        #self.mapper = MapOutputter(self, map_length, map_width)
+        #self.mapper.setOrigin(self.x, self.y)
 
         self.physical = PhysicalMapper(self)
 
@@ -45,7 +45,7 @@ class Robot:
         rightOpen = False
         if (ultrasonicList[0] > 25):
             leftOpen = True
-        if (ultrasonicList[1] > 25):
+        if (ultrasonicList[1] > 22):
             middleOpen = True
         if (ultrasonicList[2] > 25):
             rightOpen = True
@@ -64,7 +64,7 @@ class Robot:
                 self.theta = self.physical.getHeading()
                 self.x, self.y = self.physical.updatePosition(self.x, self.y, self.theta)
 
-                self.mapper.setPath(self.x, self.y)
+                #self.mapper.setPath(self.x, self.y)
                 #self.irHazards = self.irTracker.getHazards(self.x, self.y, self.theta)
                 #self.magHazards = self.magTracker.getHazards(self.x, self.y, self.theta)
 
@@ -79,9 +79,9 @@ class Robot:
                     #print('Hazard '+ str(hazard) +':'+ str(self.irHazards[hazard].x) + ',' + str(self.irHazards[hazard].y))
 
                 #print(turnable)
+                print(intendedAngle)
 
-
-                self.physical.driveStraight(30, intendedAngle, turnable, ultrasonicReadings)
+                self.physical.driveStraight(35, intendedAngle, turnable, ultrasonicReadings)
                 if not turnable[2]: sameRightTurn += 1
 
                 # If ANY right turn is available
@@ -90,21 +90,19 @@ class Robot:
                     #print('RIGHT TURN')
                     self.physical.driveStraight(30, intendedAngle, turnable, ultrasonicReadings)
                     time.sleep(.2)
-                    newAngle = self.theta-90
-                    self.turnUntil(newAngle)
-                    intendedAngle = newAngle+10
+                    intendedAngle -= 90
+                    self.turnUntil(intendedAngle+10)
                 # If ONLY left turn is available
                 elif turnable[0] and not turnable[1]:
-                    newAngle = self.theta+90
+                    intendedAngle += 90
                     #print('LEFT TURN')
-                    self.turnUntil(newAngle)
-                    intendedAngle = newAngle-10
+                    self.turnUntil(intendedAngle-10)
                 # DEAD END
                 elif not turnable[0] and not turnable[1] and not turnable[2]:
                     #print('NO OPTIONS 180')
 
-                    self.turn180(self.theta + 170)
-                    intendedAngle = self.theta + 180
+                    self.turn180(intendedAngle + 180)
+                    intendedAngle = intendedAngle + 180
 
                 #print('x:', self.x, 'y:', self.y, 'theta:', self.theta)
                 #print('ir:', self.irHazards)
