@@ -70,20 +70,20 @@ class MagTracker:
 
     # Difference between mag reading and background mag field
     def magDiff(self):
-        return abs(self.getMag() - 100)
+        return abs(self.getMag() - 95)
 
     # Scalar distance to nearby magnet
 
     # Check if magnet is nearby to guess location
     def checkMagNear(self):
-        if(self.magDiff() > 20):
+        if(self.magDiff() > 15):
             return True
         return False
 
     # Check if getting close to no-enter radius
     def checkMagDanger(self):
         # print('Mag Diff: ', self.magDiff())
-        if(self.magDiff() > 40):
+        if(self.getMag() < 70 || self.getMag() > 150):
             return True
         return False
 
@@ -96,12 +96,13 @@ class magnet:
 
     def magDist(self):
         # B = mu0M/(4piR^3) = K/R^3 --> R = (K/B)^(1/3)
-        # k = r^3 * magDiff --> k = 1350000 guess using mag of 150 at 30 cm from magnet
-        k = 1350000 # can probably get a better value by fine tuning during testing
-        mag = self.tracker.getMag()
+        # mag = 700000 / (r + 11)^3 + 95 regression equation
+        # magDiff = 700000 / (r + 11)^3
+        # r = (700000 / magDiff)^(1/3) - 11
+        mag = self.tracker.magDiff()
         r = 0
         if mag != 0:
-            r = (k / self.tracker.magDiff()) ** (1/3)
+            r = (700000 / self.tracker.magDiff()) ** (1/3) - 11
         return r
 
         # Guess magnet position as some distance in front of robot
