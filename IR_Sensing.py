@@ -100,11 +100,11 @@ class Beacon:
             if i['mag'] != 0 or i['mag'] > 85:
                 dist = IR_SLOPE * math.log(i['mag']) + IR_Y_INTERCEPT
 
-            x_dist = math.cos(i['theta']) * dist
-            y_dist = math.sin(i['theta']) * dist
+                x_dist = math.cos(i['theta']) * dist
+                y_dist = math.sin(i['theta']) * dist
 
-            x_sum += x_dist
-            y_sum += y_dist
+                x_sum += (i['x'] + x_dist)
+                y_sum += (i['y'] + y_dist)
 
         self.x = x_sum / len(self.intensities)
         self.y = y_sum / len(self.intensities)
