@@ -15,7 +15,6 @@ while not magRead:
 
 class MagTracker:
     def __init__(self):
-        self.beacon_intensity = []
         self.hazardsList = []
         self.hazardsList.append(Magnet())
         self.gettingMagData = False
@@ -91,7 +90,7 @@ class Magnet:
     def __init__(self, tracker):
         self.x = 0
         self.y = 0
-        self.intesities = []
+        self.intensities = []
         self.tracker = tracker
 
     def magDist(self):
@@ -111,18 +110,15 @@ class Magnet:
         deltaY = self.magDist() * math.sin(math.radians(theta))
         return x + deltaX, y + deltaY
 
-    def getIntensity(self):
-        return self.sensor_mag
-
     def update(self, theta, sensor_mag, robot_x, robot_y):
-        self.intesities.append({'x': robot_x, 'y': robot_y, 'theta': theta, 'mag': sensor_mag})
+        self.intensities.append({'x': robot_x, 'y': robot_y, 'theta': theta, 'mag': sensor_mag})
         x_sum = 0
         y_sum = 0
-        for i in self.intesities:
+        for i in self.intensities:
 
             x_sum, y_sum = self.markMagnet(robot_x, robot_y, theta)
 
-        self.x = x_sum / len(self.intesities)
-        self.y = y_sum / len(self.intesities)
+        self.x = x_sum / len(self.intensities)
+        self.y = y_sum / len(self.intensities)
 
         return self.x, self.y
