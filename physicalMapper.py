@@ -141,6 +141,23 @@ class PhysicalMapper:
             while current_heading <= deg:
                 self.turn('left')
                 current_heading = self.getHeading()
+                
+    def dropCargo(self):
+        BP.set_motor_power(BP.PORT_D, 15)
+        time.sleep(1)
+        BP.set_motor_power(BP.PORT_D, 0)
+        BP.set_motor_power(BP.PORT_B, 30)
+        BP.set_motor_power(BP.PORT_B, 30)
+        time.sleep(.5)
+        self.cleanup()
+        BP.set_motor_power(BP.PORT_D, -15)
+        time.sleep(1)
+        BP.set_motor_power(BP.PORT_D, 0)
+        
+    def signalCargo(self):
+        BP.set_motor_power(BP.PORT_A, 25)
+        time.sleep(5)
+        BP.set_motor_power(BP.PORT_A, 0)
 
     def cleanup(self):
         BP.reset_all()
