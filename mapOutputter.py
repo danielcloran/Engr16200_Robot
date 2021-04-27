@@ -43,19 +43,19 @@ class MapOutputter:
         return True
 
     def checkNegativeOffsets(self, x, y):
-        x = int(x)
+        x = int(x/10)
         if (x < self.negativeBoundX):
             offsetX = x - self.negativeBoundX
-            for point in self.pointList:
-                for newPoint in range(abs(offsetX)):
-                    point.insert(0, self.wallArr)
+            for newPoint in range(abs(offsetX)):
+                self.pointList.insert(0, self.wallArr)
             self.negativeBoundX = x
 
-        y = int(y)
+        y = int(y/10)
         if (y < self.negativeBoundY):
             offsetY = y - self.negativeBoundY
             for point in self.pointList:
-                point.insert(0, self.Wall())
+                for newPoint in range(abs(offsetX)):
+                    point.insert(0, self.Wall())
             self.negativeBoundY = y
 
     def addPoint(self, pointStr, x, y):
