@@ -43,13 +43,16 @@ class Robot:
         leftOpen = False
         middleOpen = False
         rightOpen = False
+        reachedEnd = False
         if (ultrasonicList[0] > 25):
             leftOpen = True
         if (ultrasonicList[1] > 23):
             middleOpen = True
         if (ultrasonicList[2] > 25):
             rightOpen = True
-        return leftOpen, middleOpen, rightOpen
+        if (ultrasonicList[0] > 190 and ultrasonicList[1] > 190 and ultrasonicList[2] > 190):
+            reachedEnd = True
+        return leftOpen, middleOpen, rightOpen, reachedEnd
 
     def run(self):
         # main logic
@@ -59,7 +62,8 @@ class Robot:
         notTurned = True
         turnable = [False, False, False]
         sameRightTurn = 11
-        while True:
+        runFinished = False
+        while not runFinished:
             try:
                 self.theta = self.physical.getHeading()
                 self.x, self.y = self.physical.updatePosition(self.x, self.y, self.theta)
@@ -91,7 +95,13 @@ class Robot:
                 if not turnable[2]: sameRightTurn += 1
 
                 # If ANY right turn is available
-                if turnable[2] and sameRightTurn > 0:
+                if turnable[3]:
+                    time.sleep(2)
+                    self.physical.cleanup()
+                    self.physical.dropCargo()
+                    self.physical.signalCargo()
+                    runFinished = True
+                elif turnable[2] and sameRightTurn > 0:
                     sameRightTurn = 0
                     #print('RIGHT TURN')
                     self.physical.driveStraight(30, intendedAngle, turnable, ultrasonicReadings)
@@ -120,6 +130,7 @@ class Robot:
             except KeyboardInterrupt:
                 self.physical.cleanup()
                 break
+            
 
     def turn180(self, deg):
         self.physical.drive(-60, 50)
