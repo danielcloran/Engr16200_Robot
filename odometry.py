@@ -69,11 +69,8 @@ class Robot:
                 self.magHazards = self.magTracker.getHazards(self.x, self.y, self.theta)
                 for hazard in self.irHazards:
                     self.mapper.setHeat(hazard.x, hazard.y)
-                #for hazard in self.magHazards:
-                #    self.mapper.setMagnet(hazard.x, hazard.y)
-
-
-
+                for hazard in self.magHazards:
+                    self.mapper.setMagnet(hazard.x, hazard.y)
 
                 ultrasonicReadings = self.physical.getUltrasonic()
                 #print('ultrasonic: ', ultrasonicReadings)
@@ -84,7 +81,7 @@ class Robot:
                 #for hazard in range(len(self.irHazards)):
                     #print('Hazard '+ str(hazard) +':'+ str(self.irHazards[hazard].x) + ',' + str(self.irHazards[hazard].y))
 
-                print(turnable)
+                #turnable)
                 #print(intendedAngle)
 
                 self.physical.driveStraight(30, intendedAngle, turnable, ultrasonicReadings)
@@ -104,9 +101,9 @@ class Robot:
                     #print('LEFT TURN')
                     self.turnUntil(intendedAngle-10)
                 # DEAD END
-                elif self.irTracker.checkIRDanger() or not turnable[0] and not turnable[1] and not turnable[2]:
-                    print('NO OPTIONS 180')
-                    print(self.irTracker.checkIRDanger())
+                elif self.magTracker.checkMagDanger() or self.irTracker.checkIRDanger() or not turnable[0] and not turnable[1] and not turnable[2]:
+                    #print('NO OPTIONS 180')
+                    #print(self.irTracker.checkIRDanger())
                     intendedAngle += 180
                     self.turn180(intendedAngle - 20)
 
@@ -115,8 +112,8 @@ class Robot:
                 mili_counter += 0.5
                 time.sleep(0.005)
 
-            #except Exception as err:
-            #    print(err)
+            except Exception as err:
+                print(err)
             except KeyboardInterrupt:
                 self.physical.cleanup()
                 break

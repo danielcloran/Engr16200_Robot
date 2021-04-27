@@ -42,7 +42,8 @@ class MagTracker:
             #print('Getting Mag x: ', self.hazardsList[0].x, 'y:', self.hazardsList[0].y)
             return self.hazardsList
         except Exception as err:
-            print(err)
+            pass
+            #print(err)
 
     # Update magnetic readings
     def updateMag(self):
