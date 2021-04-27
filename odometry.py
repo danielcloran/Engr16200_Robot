@@ -63,7 +63,7 @@ class Robot:
         turnable = [False, False, False]
         sameRightTurn = 11
         runFinished = False
-        while not runFinished:
+        while True:
             try:
                 self.theta = self.physical.getHeading()
                 self.x, self.y = self.physical.updatePosition(self.x, self.y, self.theta)
@@ -95,7 +95,9 @@ class Robot:
                 if not turnable[2]: sameRightTurn += 1
 
                 # If ANY right turn is available
-                if turnable[3]:
+                if runFinished:
+                    self.physical.cleanup()
+                elif turnable[3]:
                     time.sleep(2)
                     self.physical.cleanup()
                     self.physical.dropCargo()
