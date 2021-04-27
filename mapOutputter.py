@@ -108,7 +108,7 @@ class MapOutputter:
 
     def display_matrix(self, screen, matrix, x, y,):
         rows, cols = matrix.shape
-        
+
         for row in reversed(range(rows)):
             for col in range(cols):
                 if(matrix[(self.width - 1) - row, col]):
@@ -122,7 +122,7 @@ class MapOutputter:
                 self.screen.addstr(2,0,"Unit Length: 10cm")
                 self.screen.addstr(3,0,"Unit: cm")
                 self.screen.addstr(4,0,"Origin: (" + str(self.origin[1]-self.negativeBoundY) + ',' + str(self.origin[0]-self.negativeBoundX) + ')')
-                self.screen.addstr(5,0,"Notes: ")
+                self.screen.addstr(5,0,"Notes: 5:20pm - Team 68 - Demo Map.")
 
                 self.display_matrix(self.screen, self.pointList, 7, 0)
                 self.screen.refresh()
@@ -131,3 +131,18 @@ class MapOutputter:
             except Exception as err:
                 pass
                 #print(err)
+
+    def add_to_front(self, filename, line):
+        with open(filename, 'r+') as f:
+            content = f.read()
+            f.seek(0, 0)
+            f.write(line.rstrip('\r\n') + '\n' + content)
+
+    def save_to_csv(self):
+        np.savetxt("map.csv", self.pointList, fmt='%d', delimiter=",")
+        self.add_to_front('map.csv', "Notes: 5:20pm - Team 68 - Demo Map.")
+        self.add_to_front('map.csv', "Origin: (" + str(self.origin[1]-self.negativeBoundY) + ',' + str(self.origin[0]-self.negativeBoundX) + ')'))
+        self.add_to_front('map.csv', "Unit: cm")
+        self.add_to_front('map.csv', "Unit Length: 10cm")
+        self.add_to_front('map.csv', "Map: " + self.mapNumber)
+        self.add_to_front('map.csv', "Team: 68")

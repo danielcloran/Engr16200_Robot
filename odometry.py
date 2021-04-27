@@ -96,6 +96,7 @@ class Robot:
                     #self.mapper.setExit(self.x, self.y)
                     self.physical.dropCargo()
                     self.physical.signalCargo()
+                    self.mapper.save_to_csv()
                     runFinished = True
                 elif turnable[2] and sameRightTurn > 0:
                     sameRightTurn = 0
@@ -126,7 +127,7 @@ class Robot:
             except KeyboardInterrupt:
                 self.physical.cleanup()
                 break
-            
+
 
     def turn180(self, deg):
         self.physical.drive(-60, 50)
