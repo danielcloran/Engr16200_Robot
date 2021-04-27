@@ -46,8 +46,9 @@ class MapOutputter:
         x = int(x)
         if (x < self.negativeBoundX):
             offsetX = x - self.negativeBoundX
-            for newPoint in range(abs(offsetX)):
-                self.pointList.insert(0, self.wallArr)
+            for point in self.pointList:
+                for newPoint in range(abs(offsetX)):
+                    point.insert(0, self.wallArr)
             self.negativeBoundX = x
 
         y = int(y)
