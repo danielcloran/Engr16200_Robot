@@ -148,6 +148,13 @@ class Robot:
                 self.physical.turn('left')
                 current_heading = self.physical.getHeading()
         return current_heading;
+    
+    def writeHazardsList(self):
+        f = open("hazardslist.csv", "w")
+        f.write("Hazard Type,Parameter of Interest,Parameter Value,Hazard X Coordinate,Hazard Y Coordinate")
+        for i in range(0:len(self.magHazards) - 1):
+            f.write("Electrical / Magnetic Activity Source,Field Strength (mT),")
+            f.write(self.magHazards[i].x, ",",self.magHazards[i].y) 
 
 robot = Robot()
 robot.run()
