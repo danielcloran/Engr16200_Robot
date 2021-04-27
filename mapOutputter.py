@@ -31,7 +31,7 @@ class MapOutputter:
         self.pointList = np.full((self.width, self.length), self.Wall())
         self.wallArr = np.full((self.length), self.Wall())
 
-        self.priorityList = [self.Origin(), self.Heat(), self.Magnet(), self.Path(), self.Wall()]
+        self.priorityList = [self.Origin(), self.Exit(), self.Heat(), self.Magnet(), self.Path(), self.Wall()]
 
         self.printMapThread = threading.Thread(target=self.printMap, args=(), daemon=True)
         self.printMapThread.start()

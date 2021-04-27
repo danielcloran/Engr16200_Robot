@@ -13,8 +13,8 @@ class Robot:
     def __init__(self):
         self.width = 14
         self.wheel_d = 7
-        self.irTracker = IRTracker()
-        self.irHazards = []
+        #self.irTracker = IRTracker()
+        #self.irHazards = []
 
         self.magTracker = MagTracker()
         self.magHazards = []
@@ -30,8 +30,8 @@ class Robot:
         self.maglocx = 0
         self.maglocy = 0
 
-        self.mapper = MapOutputter(self, map_length, map_width)
-        self.mapper.setOrigin(self.x, self.y)
+        #self.mapper = MapOutputter(self, map_length, map_width)
+        #self.mapper.setOrigin(self.x, self.y)
 
         self.physical = PhysicalMapper(self)
 
@@ -50,7 +50,7 @@ class Robot:
             middleOpen = True
         if (ultrasonicList[2] > 25):
             rightOpen = True
-        if (ultrasonicList[0] > 190 and ultrasonicList[1] > 190 and ultrasonicList[2] > 190):
+        if (ultrasonicList[0] > 50 and ultrasonicList[1] > 50 and ultrasonicList[2] > 50):
             reachedEnd = True
         return leftOpen, middleOpen, rightOpen, reachedEnd
 
@@ -68,25 +68,19 @@ class Robot:
                 self.theta = self.physical.getHeading()
                 self.x, self.y = self.physical.updatePosition(self.x, self.y, self.theta)
 
-                self.mapper.setPath(self.x, self.y)
-                self.irHazards = self.irTracker.getHazards(self.x, self.y, self.theta)
-                self.magHazards = self.magTracker.getHazards(self.x, self.y, self.theta)
-                for hazard in self.irHazards:
-                    self.mapper.setHeat(hazard.x, hazard.y)
-                for hazard in self.magHazards:
-                    self.mapper.setMagnet(hazard.x, hazard.y)
+                #self.mapper.setPath(self.x, self.y)
+                if (mili_counter >= mili_interrupt):
+                    mili_counter = 0
+                    self.magHazards = self.magTracker.getHazards(self.x, self.y, self.theta)
+                #self.irHazards = self.irTracker.getHazards(self.x, self.y, self.theta)
+
+                #for hazard in self.irHazards:
+                #    self.mapper.setHeat(hazard.x, hazard.y)
+                #for hazard in self.magHazards:
+                #    self.mapper.setMagnet(hazard.x, hazard.y)
 
                 ultrasonicReadings = self.physical.getUltrasonic()
-                #print('ultrasonic: ', ultrasonicReadings)
-
                 turnable = self.determineOpenSides(ultrasonicReadings)
-
-                #print(self.irHazards)
-                #for hazard in range(len(self.irHazards)):
-                    #print('Hazard '+ str(hazard) +':'+ str(self.irHazards[hazard].x) + ',' + str(self.irHazards[hazard].y))
-
-                #turnable)
-                #print(intendedAngle)
 
                 self.physical.driveStraight(30, intendedAngle, turnable, ultrasonicReadings)
                 if not turnable[2]: sameRightTurn += 1
@@ -94,9 +88,12 @@ class Robot:
                 # If ANY right turn is available
                 if runFinished:
                     self.physical.cleanup()
+                    break
                 elif turnable[3]:
-                    time.sleep(2)
-                    self.physical.cleanup()
+                    time.sleep(1)
+                    self.physical.drive(0)
+                    time.sleep(1)
+                    #self.mapper.setExit(self.x, self.y)
                     self.physical.dropCargo()
                     self.physical.signalCargo()
                     runFinished = True
@@ -113,7 +110,7 @@ class Robot:
                     #print('LEFT TURN')
                     self.turnUntil(intendedAngle-10)
                 # DEAD END
-                elif self.magTracker.checkMagDanger() or self.irTracker.checkIRDanger() or not turnable[0] and not turnable[1] and not turnable[2]:
+                elif not turnable[0] and not turnable[1] and not turnable[2]:
                     #print('NO OPTIONS 180')
                     #print(self.irTracker.checkIRDanger())
                     intendedAngle += 180
@@ -121,8 +118,8 @@ class Robot:
 
                 #print('x:', self.x, 'y:', self.y, 'theta:', self.theta)
                 #print('ir:', self.irHazards)
-                mili_counter += 0.5
-                time.sleep(0.005)
+                mili_counter += 1
+                time.sleep(0.01)
 
             except Exception as err:
                 print(err)

@@ -16,7 +16,7 @@ while not magRead:
 class MagTracker:
     def __init__(self):
         self.hazardsList = []
-        self.hazardsList.append(Magnet())
+        self.hazardsList.append(Magnet(self))
         self.gettingMagData = False
         self.mag = 100
         self.magX = 0
@@ -25,19 +25,21 @@ class MagTracker:
 
     # returns a list of all known hazards
     def getHazards(self, x_pos, y_pos, theta):
+        print('Getting magnet hazards')
         try:
             self.updateMag();
             # print('mag: ', self.mag)
             if self.mag == 0 : self.mag = 100
+            print('Mag: ', self.mag)
 
-            if self.checkMagNear() == False and self.gettingMagData = True:
+            if not self.checkMagNear() and self.gettingMagData:
                 self.gettingMagData = False
-                self.hazardsList.append(Magnet())
+                self.hazardsList.append(Magnet(self))
 
             if self.checkMagNear():
                 self.gettingMagData = True
                 self.hazardsList[len(self.hazardsList)-1].update(theta, self.mag, x_pos, y_pos)
-            #print('Getting Mag x: ', self.hazardsList[0].x, 'y:', self.hazardsList[0].y)
+            print('Getting Mag x: ', self.hazardsList[0].x, 'y:', self.hazardsList[0].y)
             return self.hazardsList
         except Exception as err:
             pass
@@ -49,6 +51,10 @@ class MagTracker:
         self.magX = m['x']
         self.magY = m['y']
         self.magZ = m['z']
+        print('self.magX', self.magX)
+        print('self.magY', self.magY)
+        print('self.magZ', self.magZ)
+
         self.mag = math.sqrt(self.magX ** 2 + self.magY ** 2 + self.magZ ** 2)
 
     # Magnetic magnitude
@@ -115,9 +121,10 @@ class Magnet:
         x_sum = 0
         y_sum = 0
         for i in self.intensities:
-
-            x_sum, y_sum += self.markMagnet(i['x'], i['y'], i['theta'], i['mag'])
-
+            tempList = self.markMagnet(i['x'], i['y'], i['theta'], i['mag'])
+            x_sum += tempList[0]
+            y_sum += tempList[1]
+            
         self.x = x_sum / len(self.intensities)
         self.y = y_sum / len(self.intensities)
 
