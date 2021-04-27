@@ -20,10 +20,14 @@ class MapOutputter:
         self.screen.nodelay(True)
         self.screen.keypad(True)
 
+        self.negativeBoundX = 0
+        self.negativeBoundY = 0
+
         self.robot = robot
         self.length = int(length/10)
         self.width = int(width/10)
-        self.pointList = np.empty((self.width,self.length), dtype=object)
+        self.pointList = np.empty((self.width, self.length), dtype=object)
+        self.wallArr = np.full((self.length), self.Wall())
 
         self.priorityList = [self.Origin(), self.Heat(), self.Magnet(), self.Path(), self.Wall()]
 
@@ -38,77 +42,71 @@ class MapOutputter:
             pass
         return True
 
+    def checkNegativeOffsets(self, x, y):
+        x = int(x)
+        if (x < self.negativeBoundX):
+            offsetX = x - self.negativeBoundX
+            for newPoint in range(abs(offsetX)):
+                self.pointList.insert(0, self.wallArr)
+            self.negativeBoundX = x
+
+        y = int(y)
+        if (y < self.negativeBoundY):
+            offsetY = y - self.negativeBoundY
+            for point in self.pointList:
+                point.insert(0, self.Wall())
+            self.negativeBoundY = y
+
+    def addPoint(self, pointStr, x, y):
+        if(self.checkPriority(pointStr, x, y)):
+            self.checkNegativeOffsets(x, y)
+            self.pointList[int(x/10) - self.negativeBoundX, int(y/10) - self.negativeBoundY] = pointStr
+
     def setWall(self, x, y):
-        if(self.checkPriority(self.Wall, x, y)):
-            self.pointList[int(x/10),int(y/10)] = self.Wall()
+        addPoint(self.Wall(), x, y)
 
     def Wall(self):
-        return "0"##BOLD + "0" + END
+        return "0"
 
     def setPath(self, x, y):
-        if(self.checkPriority(self.Path(), x, y)):
-            self.pointList[int(x/10),int(y/10)] = self.Path()
+        addPoint(self.Path(), x, y)
 
     def Path(self):
-        return "1"#PATH + "1" + END
+        return "1"
 
     def setOrigin(self, x, y):
-        if(self.checkPriority(self.Origin(), x, y)):
-            self.pointList[int(x/10),int(y/10)] = self.Origin()
+        addPoint(self.Origin(), x, y)
 
     def Origin(self):
-        return "5"#PATH + "5" + END
+        return "5"
 
     def setExit(self, x, y):
-        if(self.checkPriority(self.Exit(), x, y)):
-            self.pointList[int(x/10),int(y/10)] = self.Exit()
+        addPoint(self.Exit(), x, y)
 
     def Exit(self):
-        return "4"#PATH + "4" + END
+        return "4"
 
     def setMagnet(self, x, y):
-        if(self.checkPriority(self.Magnet(), x, y)):
-            self.pointList[int(x/10),int(y/10)] = self.Magnet()
+        addPoint(self.Magnet(), x, y)
 
     def Magnet(self):
-        return "3" # MAGNET + BOLD + "3" + END
+        return "3"
 
     def setHeat(self, x, y):
-        if(self.checkPriority(self.Heat(), x, y)):
-            self.pointList[int(x/10),int(y/10)] = self.Heat()
+        addPoint(self.Heat(), x, y)
 
     def Heat(self):
-        return "2" #HEAT + BOLD + "2" + END
+        return "2"
 
-    def getRanges(self):
-        # ACTUAL MAP
-        seq = [x['x'] for x in self.pointList]
-        maxX = max(seq)
-        minX = min(seq)
-        rangeX = maxX - minX
-        seq = [y['y'] for y in self.pointList]
-        maxY = max(seq)
-        minY = min(seq)
-        rangeY = maxY - minY
-        return minX, minY, rangeX, rangeY
-
-    def display_matrix(self, screen, m, x, y, precision=2, title=None):
+    def display_matrix(self, screen, matrix, x, y,):
         rows, cols = m.shape
-        if title:
-            screen.addstr(x, y, title)
-            x += 1
-        #screen.addstr(x, y, "[")
-        #screen.addstr(x, cols*(4+precision)+y+1, "]")
-        #screen.addstr(rows+x-1, y, "[")
-        #screen.addstr(rows+x-1, cols*(4+precision)+y+1, "]")
-        for row in range(rows):
-            for col in range(cols):
-                if(m[row, col]):
-                    screen.addstr(row+x, col, m[row, col])
-                else:
-                    screen.addstr(row+x, col, self.Wall())
 
-                #screen.addstr(row+x, col*(4+precision)+y+1, m[row, col])
+        for row in reversed(range(rows)):
+            for col in range(cols):
+                if(matrix[row, col]):
+                    screen.addstr(row-x, col, matrix[row, col])
+                else:
+                    screen.addstr(row-x, col, self.Wall())
 
     def printMap(self):
         while True:

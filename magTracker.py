@@ -83,7 +83,7 @@ class MagTracker:
     # Check if getting close to no-enter radius
     def checkMagDanger(self):
         # print('Mag Diff: ', self.magDiff())
-        if(self.getMag() < 70 || self.getMag() > 150):
+        if(self.getMag() < 70 or self.getMag() > 150):
             return True
         return False
 

@@ -45,7 +45,7 @@ class Robot:
         rightOpen = False
         if (ultrasonicList[0] > 25):
             leftOpen = True
-        if (ultrasonicList[1] > 22):
+        if (ultrasonicList[1] > 23):
             middleOpen = True
         if (ultrasonicList[2] > 25):
             rightOpen = True
@@ -65,10 +65,14 @@ class Robot:
                 self.x, self.y = self.physical.updatePosition(self.x, self.y, self.theta)
 
                 self.mapper.setPath(self.x, self.y)
-                #self.irHazards = self.irTracker.getHazards(self.x, self.y, self.theta)
+                self.irHazards = self.irTracker.getHazards(self.x, self.y, self.theta)
                 self.magHazards = self.magTracker.getHazards(self.x, self.y, self.theta)
-                for hazard in magHazards:
-                    self.mapper.setMagnet(hazard.x, hazard.y)
+                for hazard in self.irHazards:
+                    self.mapper.setHeat(hazard.x, hazard.y)
+                #for hazard in self.magHazards:
+                #    self.mapper.setMagnet(hazard.x, hazard.y)
+
+
 
 
                 ultrasonicReadings = self.physical.getUltrasonic()
@@ -80,14 +84,14 @@ class Robot:
                 #for hazard in range(len(self.irHazards)):
                     #print('Hazard '+ str(hazard) +':'+ str(self.irHazards[hazard].x) + ',' + str(self.irHazards[hazard].y))
 
-                #print(turnable)
-                print(intendedAngle)
+                print(turnable)
+                #print(intendedAngle)
 
-                self.physical.driveStraight(35, intendedAngle, turnable, ultrasonicReadings)
+                self.physical.driveStraight(30, intendedAngle, turnable, ultrasonicReadings)
                 if not turnable[2]: sameRightTurn += 1
 
                 # If ANY right turn is available
-                if turnable[2] and sameRightTurn > 5:
+                if turnable[2] and sameRightTurn > 0:
                     sameRightTurn = 0
                     #print('RIGHT TURN')
                     self.physical.driveStraight(30, intendedAngle, turnable, ultrasonicReadings)
@@ -100,15 +104,16 @@ class Robot:
                     #print('LEFT TURN')
                     self.turnUntil(intendedAngle-10)
                 # DEAD END
-                elif self.magTracker.checkIRDanger() or not turnable[0] and not turnable[1] and not turnable[2]:
-                    #print('NO OPTIONS 180')
-                    self.turn180(intendedAngle + 180)
-                    intendedAngle = intendedAngle + 180
+                elif self.irTracker.checkIRDanger() or not turnable[0] and not turnable[1] and not turnable[2]:
+                    print('NO OPTIONS 180')
+                    print(self.irTracker.checkIRDanger())
+                    intendedAngle += 180
+                    self.turn180(intendedAngle - 20)
 
                 #print('x:', self.x, 'y:', self.y, 'theta:', self.theta)
                 #print('ir:', self.irHazards)
-                mili_counter += 1
-                time.sleep(0.01)
+                mili_counter += 0.5
+                time.sleep(0.005)
 
             #except Exception as err:
             #    print(err)
@@ -117,8 +122,8 @@ class Robot:
                 break
 
     def turn180(self, deg):
-        self.physical.drive(-50, 40)
-        time.sleep(.6)
+        self.physical.drive(-60, 50)
+        time.sleep(.7)
         current_heading = self.physical.getHeading()
         while current_heading <= deg:
             self.physical.turnNoRadius('right')

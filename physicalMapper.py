@@ -83,7 +83,7 @@ class PhysicalMapper:
 
     def driveStraight(self, power, initialHeading, turnable, ultrasonicReadings):
         kp_angle = 1.5
-        kp_wall = 2
+        kp_wall = 1.5
         try:
             wall_gain = 0
             if (not turnable[0] and not turnable[2]):
@@ -126,9 +126,9 @@ class PhysicalMapper:
         if direction == 'left':
             #BP.set_motor_power(BP.PORT_C, -motor_power)
             BP.set_motor_power(BP.PORT_C, 0)
-            BP.set_motor_power(BP.PORT_B, 35)
+            BP.set_motor_power(BP.PORT_B, 40)
         else:
-            BP.set_motor_power(BP.PORT_C, 35)
+            BP.set_motor_power(BP.PORT_C, 40)
             BP.set_motor_power(BP.PORT_B, 0)
             #BP.set_motor_power(BP.PORT_B, -motor_power)
 

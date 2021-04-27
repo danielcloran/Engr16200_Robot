@@ -74,11 +74,12 @@ class IRTracker:
             # print('Getting IR x: ', self.hazardsList[0].x, 'y:', self.hazardsList[0].y)
             return self.hazardsList
         except Exception as err:
-            print(err)
+            #print(err)
+            pass
 
     # Check if getting close to no-enter radius
     def checkIRDanger(self):
-        if self.sensor_mag > 80:
+        if self.sensor_mag > 40:
             return True
         return False
 
