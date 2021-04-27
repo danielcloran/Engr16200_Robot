@@ -105,9 +105,9 @@ class Magnet:
         return r
 
         # Guess magnet position as some distance in front of robot
-    def markMagnet(self, x, y, theta):
-        deltaX = self.magDist() * math.cos(math.radians(theta))
-        deltaY = self.magDist() * math.sin(math.radians(theta))
+    def markMagnet(self, x, y, theta, mag):
+        deltaX = mag * math.cos(math.radians(theta))
+        deltaY = mag * math.sin(math.radians(theta))
         return x + deltaX, y + deltaY
 
     def update(self, theta, sensor_mag, robot_x, robot_y):
@@ -116,7 +116,7 @@ class Magnet:
         y_sum = 0
         for i in self.intensities:
 
-            x_sum, y_sum = self.markMagnet(robot_x, robot_y, theta)
+            x_sum, y_sum += self.markMagnet(i['x'], i['y'], i['theta'], i['mag'])
 
         self.x = x_sum / len(self.intensities)
         self.y = y_sum / len(self.intensities)
