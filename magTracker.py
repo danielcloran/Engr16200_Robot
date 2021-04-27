@@ -16,9 +16,9 @@ while not magRead:
 class MagTracker:
     def __init__(self):
         self.beacon_intensity = []
-        self.hazardsList = {}
-        self.beaconNumber = 0
-        self.magnetNear = False
+        self.hazardsList = []
+        self.hazardsList.append(Magnet())
+        self.gettingMagData = False
         self.mag = 100
         self.magX = 0
         self.magY = 0
@@ -31,13 +31,12 @@ class MagTracker:
             # print('mag: ', self.mag)
             if self.mag == 0 : self.mag = 100
 
-            if self.magnetNear == True and self.mag == 0:
-                self.beaconNumber += 1
-                self.magnetNear = False
-                self.hazardsList[self.beaconNumber] = magnet(self)
+            if self.checkMagNear() == False and self.gettingMagData = True:
+                self.gettingMagData = False
+                self.hazardsList.append(Magnet())
 
             if self.checkMagNear():
-                self.magnetNear = True
+                self.gettingMagData = True
                 self.hazardsList[len(self.hazardsList)-1].update(theta, self.mag, x_pos, y_pos)
             #print('Getting Mag x: ', self.hazardsList[0].x, 'y:', self.hazardsList[0].y)
             return self.hazardsList
@@ -88,7 +87,7 @@ class MagTracker:
             return True
         return False
 
-class magnet:
+class Magnet:
     def __init__(self, tracker):
         self.x = 0
         self.y = 0
