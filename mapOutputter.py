@@ -53,7 +53,6 @@ class MapOutputter:
             for newPoint in range(abs(offsetX)):
                 self.pointList = np.insert(self.pointList, 0, self.wallArr, axis = 0)
                 self.pointList = np.delete(self.pointList, self.width-1, axis = 0)
-                #self.pointList.insert(0, self.wallArr)
             self.negativeBoundX = x
 
         y = int(y/10)
@@ -62,7 +61,6 @@ class MapOutputter:
             for newPoint in range(abs(offsetY)):
                 self.pointList = np.insert(self.pointList, 0, self.Wall(), axis=1)
                 self.pointList = np.delete(self.pointList, self.length-1, axis=1)
-                    #point.insert(0, self.Wall())
             self.negativeBoundY = y
 
     def addPoint(self, pointStr, x, y):
@@ -133,9 +131,8 @@ class MapOutputter:
                 pass
             except Exception as err:
                 pass
-                #print(err)
 
-    def quit(self):
+    def cleanup(self):
         self.stopped = True
         time.sleep(0.3)
         self.printMapThread.join()

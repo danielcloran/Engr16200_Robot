@@ -27,12 +27,9 @@ class MagTracker:
 
     # returns a list of all known hazards
     def getHazards(self, x_pos, y_pos, theta):
-        #print('Getting magnet hazards')
         try:
             self.updateMag();
-            # print('mag: ', self.mag)
             if self.mag == 0 : self.mag = MAG_BASE_READ
-            #print('Mag: ', self.mag)
 
             if not self.checkMagNear() and self.gettingMagData:
                 self.gettingMagData = False
@@ -41,11 +38,9 @@ class MagTracker:
             if self.checkMagNear():
                 self.gettingMagData = True
                 self.hazardsList[len(self.hazardsList)-1].update(theta, self.mag, x_pos, y_pos)
-            #print('Getting Mag x: ', self.hazardsList[0].x, 'y:', self.hazardsList[0].y)
             return self.hazardsList
         except Exception as err:
             pass
-            #print(err)
 
     # Update magnetic readings
     def updateMag(self):
@@ -53,10 +48,6 @@ class MagTracker:
         self.magX = m['x']
         self.magY = m['y']
         self.magZ = m['z']
-        #print('self.magX', self.magX)
-        #print('self.magY', self.magY)
-        #print('self.magZ', self.magZ)
-
         self.mag = math.sqrt(self.magX ** 2 + self.magY ** 2 + self.magZ ** 2)
 
     # Magnetic magnitude
@@ -79,8 +70,6 @@ class MagTracker:
     def magDiff(self):
         return abs(self.getMag() - MAG_BASE_READ)
 
-    # Scalar distance to nearby magnet
-
     # Check if magnet is nearby to guess location
     def checkMagNear(self):
         if(self.magDiff() > 15):
@@ -89,7 +78,6 @@ class MagTracker:
 
     # Check if getting close to no-enter radius
     def checkMagDanger(self):
-        # print('Mag Diff: ', self.magDiff())
         if(self.getMag() < 165 or self.getMag() > 245):
             return True
         return False
@@ -125,7 +113,7 @@ class Magnet:
             tempList = self.markMagnet(i['x'], i['y'], i['theta'], i['mag'])
             x_sum += tempList[0]
             y_sum += tempList[1]
-            
+
         self.x = x_sum / len(self.intensities)
         self.y = y_sum / len(self.intensities)
 

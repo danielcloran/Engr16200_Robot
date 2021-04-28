@@ -13,7 +13,7 @@ magY = 0
 magZ = 0
 
 class magSensor:
-    def __init__(self):    
+    def __init__(self):
         self.mag = 0
         self.magX = 0
         self.magY = 0

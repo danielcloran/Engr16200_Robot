@@ -127,7 +127,6 @@ class PhysicalMapper:
         else:
             BP.set_motor_power(BP.PORT_C, 40)
             BP.set_motor_power(BP.PORT_B, 0)
-            #BP.set_motor_power(BP.PORT_B, -motor_power)
 
     def turnUntil(self, deg):
         current_heading = self.getHeading()
