@@ -38,14 +38,13 @@ sensorData3 = 0
 sensorData4 = 0
 while not sensorData or not sensorData2 or not sensorData3 or not sensorData4:
     try:
-        sensorData = BP.get_sensor(GYRO_SENSE)   # print the gyro sensor values
+        sensorData = BP.get_sensor(GYRO_SENSE)
         sensorData2 = BP.get_sensor(ULTRASONIC_LEFT)
         sensorData3 = grovepi.ultrasonicRead(ultrasonic_middle)
         sensorData4 = grovepi.ultrasonicRead(ultrasonic_right)
 
     except Exception as error:
         pass
-        #print(error)
 
 class PhysicalMapper:
     def __init__(self, robot):
@@ -123,7 +122,6 @@ class PhysicalMapper:
 
     def turn(self,direction):
         if direction == 'left':
-            #BP.set_motor_power(BP.PORT_C, -motor_power)
             BP.set_motor_power(BP.PORT_C, 0)
             BP.set_motor_power(BP.PORT_B, 40)
         else:
@@ -141,7 +139,7 @@ class PhysicalMapper:
             while current_heading <= deg:
                 self.turn('left')
                 current_heading = self.getHeading()
-                
+
     def dropCargo(self):
         BP.set_motor_power(BP.PORT_D, 15)
         time.sleep(1)
@@ -152,7 +150,7 @@ class PhysicalMapper:
         BP.set_motor_power(BP.PORT_D, -15)
         time.sleep(1)
         BP.set_motor_power(BP.PORT_D, 0)
-        
+
     def signalCargo(self):
         BP.set_motor_power(BP.PORT_A, 25)
         time.sleep(5)
