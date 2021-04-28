@@ -6,6 +6,8 @@ from IMUCode.MPU9250 import MPU9250
 
 mpu = MPU9250()
 
+MAG_BASE_READ = 190
+
 magRead = 0
 while not magRead:
     try:
@@ -18,19 +20,19 @@ class MagTracker:
         self.hazardsList = []
         self.hazardsList.append(Magnet(self))
         self.gettingMagData = False
-        self.mag = 100
+        self.mag = MAG_BASE_READ
         self.magX = 0
         self.magY = 0
         self.magZ = 0
 
     # returns a list of all known hazards
     def getHazards(self, x_pos, y_pos, theta):
-        print('Getting magnet hazards')
+        #print('Getting magnet hazards')
         try:
             self.updateMag();
             # print('mag: ', self.mag)
-            if self.mag == 0 : self.mag = 100
-            print('Mag: ', self.mag)
+            if self.mag == 0 : self.mag = MAG_BASE_READ
+            #print('Mag: ', self.mag)
 
             if not self.checkMagNear() and self.gettingMagData:
                 self.gettingMagData = False
@@ -39,7 +41,7 @@ class MagTracker:
             if self.checkMagNear():
                 self.gettingMagData = True
                 self.hazardsList[len(self.hazardsList)-1].update(theta, self.mag, x_pos, y_pos)
-            print('Getting Mag x: ', self.hazardsList[0].x, 'y:', self.hazardsList[0].y)
+            #print('Getting Mag x: ', self.hazardsList[0].x, 'y:', self.hazardsList[0].y)
             return self.hazardsList
         except Exception as err:
             pass
@@ -51,9 +53,9 @@ class MagTracker:
         self.magX = m['x']
         self.magY = m['y']
         self.magZ = m['z']
-        print('self.magX', self.magX)
-        print('self.magY', self.magY)
-        print('self.magZ', self.magZ)
+        #print('self.magX', self.magX)
+        #print('self.magY', self.magY)
+        #print('self.magZ', self.magZ)
 
         self.mag = math.sqrt(self.magX ** 2 + self.magY ** 2 + self.magZ ** 2)
 
@@ -75,7 +77,7 @@ class MagTracker:
 
     # Difference between mag reading and background mag field
     def magDiff(self):
-        return abs(self.getMag() - 95)
+        return abs(self.getMag() - MAG_BASE_READ)
 
     # Scalar distance to nearby magnet
 
@@ -88,7 +90,7 @@ class MagTracker:
     # Check if getting close to no-enter radius
     def checkMagDanger(self):
         # print('Mag Diff: ', self.magDiff())
-        if(self.getMag() < 70 or self.getMag() > 150):
+        if(self.getMag() < 165 or self.getMag() > 245):
             return True
         return False
 
@@ -99,12 +101,11 @@ class Magnet:
         self.intensities = []
         self.tracker = tracker
 
-    def magDist(self):
+    def magDist(self, mag):
         # B = mu0M/(4piR^3) = K/R^3 --> R = (K/B)^(1/3)
         # mag = 700000 / (r + 11)^3 + 95 regression equation
         # magDiff = 700000 / (r + 11)^3
         # r = (700000 / magDiff)^(1/3) - 11
-        mag = self.tracker.magDiff()
         r = 0
         if mag != 0:
             r = (700000 / self.tracker.magDiff()) ** (1/3) - 11
@@ -112,8 +113,8 @@ class Magnet:
 
         # Guess magnet position as some distance in front of robot
     def markMagnet(self, x, y, theta, mag):
-        deltaX = mag * math.cos(math.radians(theta))
-        deltaY = mag * math.sin(math.radians(theta))
+        deltaX = self.magDist(mag) * math.cos(math.radians(theta))
+        deltaY = self.magDist(mag) * math.sin(math.radians(theta))
         return x + deltaX, y + deltaY
 
     def update(self, theta, sensor_mag, robot_x, robot_y):

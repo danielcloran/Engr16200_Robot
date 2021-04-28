@@ -25,6 +25,8 @@ class MapOutputter:
 
         self.origin = [0,0]
 
+        self.stopped = False
+
         self.robot = robot
         self.length = int(length/10)
         self.width = int(width/10)
@@ -115,22 +117,28 @@ class MapOutputter:
                     screen.addstr(row+x, col, matrix[(self.width - 1) - row, col])
 
     def printMap(self):
-        while True:
+        while not self.stopped:
             try:
                 self.screen.addstr(0,0,"Team: 68")
                 self.screen.addstr(1,0,"Map: " + self.mapNumber)
                 self.screen.addstr(2,0,"Unit Length: 10cm")
                 self.screen.addstr(3,0,"Unit: cm")
                 self.screen.addstr(4,0,"Origin: (" + str(self.origin[1]-self.negativeBoundY) + ',' + str(self.origin[0]-self.negativeBoundX) + ')')
+                self.screen.clrtoeol()
                 self.screen.addstr(5,0,"Notes: 5:20pm - Team 68 - Demo Map.")
 
-                self.display_matrix(self.screen, self.pointList, 7, 0)
+                self.display_matrix(self.screen, self.pointList, 8, 0)
                 self.screen.refresh()
             except curses.error:
                 pass
             except Exception as err:
                 pass
                 #print(err)
+
+    def quit(self):
+        self.stopped = True
+        time.sleep(0.3)
+        self.printMapThread.join()
 
     def add_to_front(self, filename, line):
         with open(filename, 'r+') as f:
@@ -139,9 +147,10 @@ class MapOutputter:
             f.write(line.rstrip('\r\n') + '\n' + content)
 
     def save_to_csv(self):
-        np.savetxt("map.csv", self.pointList, fmt='%d', delimiter=",")
+        invertedRows = np.flipud(self.pointList)
+        np.savetxt("map.csv", invertedRows, fmt='%s', delimiter=",")
         self.add_to_front('map.csv', "Notes: 5:20pm - Team 68 - Demo Map.")
-        self.add_to_front('map.csv', "Origin: (" + str(self.origin[1]-self.negativeBoundY) + ',' + str(self.origin[0]-self.negativeBoundX) + ')'))
+        self.add_to_front('map.csv', "Origin: (" + str(self.origin[1]-self.negativeBoundY) + ',' + str(self.origin[0]-self.negativeBoundX) + ')')
         self.add_to_front('map.csv', "Unit: cm")
         self.add_to_front('map.csv', "Unit Length: 10cm")
         self.add_to_front('map.csv', "Map: " + self.mapNumber)
